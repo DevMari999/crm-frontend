@@ -1,0 +1,20 @@
+.admin-panel {
+    padding: 20px;
+}
+
+.create-manager {
+    margin-bottom: 20px;
+}
+
+.managers-list {
+    list-style: none;
+    padding: 0;
+}
+
+.managers-list li {
+    margin-bottom: 10px;
+}
+
+.managers-list button {
+    margin-left: 10px;
+}

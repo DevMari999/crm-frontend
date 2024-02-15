@@ -1,0 +1,101 @@
+.orders {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.search-fields-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 97%;
+}
+
+.search-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin: 30px 0;
+}
+
+.search-field {
+    padding: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.search-field input {
+    font-size: 14px;
+    width: 197px;
+    height: 33px;
+    border: 1px solid black;
+    background: linear-gradient(145deg, rgba(24, 26, 35, 0.98) 0%, rgba(54, 58, 74, 0.98) 100%);
+    padding: 4px 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    color: #FFFFFF;
+    outline: none;
+    transition: all 0.4s ease;
+}
+
+.search-field input::placeholder {
+    color: rgb(255, 255, 255);
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.search-field input:focus {
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.7);
+    background: linear-gradient(145deg, rgba(32, 35, 48, 1) 0%, rgba(39, 42, 55, 1) 100%);
+    transform: translateY(-2px);
+}
+
+.search-field input:hover {
+    background: linear-gradient(145deg, rgba(32, 35, 48, 0.9) 0%, rgba(39, 42, 55, 0.9) 100%);
+    transform: translateY(-2px);
+}
+
+.extra-filter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    width: 15%;
+    margin: 15px;
+}
+
+.extra-filter img {
+    height: 27px;
+    margin-left: 13px;
+    cursor: pointer;
+}
+
+@keyframes rotate180 {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(180deg);
+    }
+}
+
+@keyframes rotateBack {
+    from {
+        transform: rotate(180deg);
+    }
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+.rotate {
+    animation: rotate180 0.5s forwards;
+}
+
+.rotateBack {
+    animation: rotateBack 0.5s forwards;
+}

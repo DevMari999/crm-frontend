@@ -1,0 +1,16 @@
+.each-manager {
+    height: 150px;
+    margin: 30px 50px;
+    font-size: 16px;
+    box-shadow: 0 0 7px #717171;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.managers-btn {
+    font-size: 13px;
+    margin: 5px;
+}
