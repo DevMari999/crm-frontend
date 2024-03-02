@@ -1,16 +1,27 @@
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
 .each-manager {
     height: 150px;
-    margin: 30px 50px;
+    margin: 20px 50px;
     font-size: 16px;
-    box-shadow: 0 0 7px #717171;
-    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px;
+    padding: 0 30px !important;
+    border: #d1d1d1 0.03em solid;
+    box-shadow: 1px 2px 3px rgba(203, 203, 203, 0.8);
 }
 
 .managers-btn {
     font-size: 13px;
     margin: 5px;
+}
+
+.manager-ul li {
+    list-style-type: none;
 }

@@ -14,3 +14,8 @@ export interface UserPaginationResult {
     currentData: UserTypes[];
     totalPages: number;
 }
+
+export interface DecodedToken {
+    userId: string;
+    userRole: string;
+}

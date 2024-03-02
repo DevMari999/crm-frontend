@@ -1,20 +1,21 @@
-.admin-panel {
-    padding: 20px;
+.admin-panel-wrapper {
+    padding: 50px 0;
 }
 
-.create-manager {
-    margin-bottom: 20px;
+.manager-modal {
+    font-size: 15px;
 }
 
-.managers-list {
-    list-style: none;
-    padding: 0;
+.manager-modal form {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-direction: column !important;
+    width: 100% !important;
 }
 
-.managers-list li {
-    margin-bottom: 10px;
-}
-
-.managers-list button {
-    margin-left: 10px;
+.manager-btn {
+    width: 190px;
+    margin-left: 50px;
+    font-size: 14px;
 }

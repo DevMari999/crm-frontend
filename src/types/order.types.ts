@@ -1,8 +1,10 @@
 export interface Comment {
+    _id: string;
     managerId: string;
     comment: string;
     createdAt: string;
 }
+
 export interface Order {
     _id: string;
     name: string;
@@ -27,4 +29,12 @@ export interface Order {
 export interface PaginationResult {
     currentData: Order[];
     totalPages: number;
+}
+
+export interface CommentInput {
+    [orderId: string]: string;
+}
+
+export interface TempComments {
+    [orderId: string]: string[];
 }

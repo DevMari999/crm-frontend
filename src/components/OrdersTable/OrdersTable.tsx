@@ -1,18 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux'
 import {useNavigate, useLocation} from 'react-router-dom';
 import {AppDispatch, RootState} from '../../store/store';
-import {fetchOrders, setCurrentPage, setSortBy} from '../../slices/orders.slice';
+import {fetchOrders, setCurrentPage, setExpandedRow, setSortBy} from '../../slices/orders.slice';
 import './OrdersTable.css';
 import {Order} from "../../types/order.types";
-import EditOrder from "../EditOrder/EditOrder";
+import Pagination from "../Pagination/Pagination";
+import OrderDetails from "../OrderDetails/OrderDetails";
+import {CommentInput, TempComments} from "../../types/order.types";
+
 const OrdersTable = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch<AppDispatch>();
     const itemsPerPage = 25;
-    const [expandedRow, setExpandedRow] = useState<string | null>(null);
-
     const orders = useSelector((state: RootState) => state.orders.data);
     const isLoading = useSelector((state: RootState) => state.orders.isLoading);
     const currentPage = useSelector((state: RootState) => state.orders.currentPage);
@@ -23,60 +24,41 @@ const OrdersTable = () => {
     const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
     const [commentInput, setCommentInput] = useState<CommentInput>({});
     const [tempComments, setTempComments] = useState<TempComments>({});
+    const expandedRow = useSelector((state: RootState) => state.orders.expandedRowId);
+    const [managerLastNames, setManagerLastNames] = useState<Record<string, string>>({});
+    const fetchedManagerIds = useRef(new Set());
 
-    interface CommentInput {
-        [orderId: string]: string;
-    }
+    useEffect(() => {
+        orders.forEach((order) => {
+            const managerId = order.manager;
+            if (managerId && !fetchedManagerIds.current.has(managerId)) {
+                fetchedManagerIds.current.add(managerId);
+                fetch(`http://localhost:8080/api/users/${managerId}`)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch');
+                        }
+                        return response.json();
+                    })
+                    .then((userData) => {
+                        console.log("User Data:", userData);
+                        setManagerLastNames(prev => ({
+                            ...prev,
+                            [managerId]: userData.lastname,
+                        }));
+                    })
 
-    interface TempComments {
-        [orderId: string]: string[];
-    }
+                    .catch((error) => {
+                        console.error("Failed to fetch user data:", error);
+                        fetchedManagerIds.current.delete(managerId);
+                    });
+            }
+        });
+    }, [orders]);
 
-    const renderPagination = () => {
-        let pages = [];
-        const range = 5;
-        const delta = Math.floor(range / 2);
-        let start = Math.max(currentPage - delta, 1);
-        let end = Math.min(start + range - 1, totalPages);
 
-        if (totalPages - currentPage < delta) {
-            start = Math.max(totalPages - range + 1, 1);
-        }
-
-        pages.push(
-            <button key="prev" onClick={() => handlePreviousPage()} disabled={currentPage === 1}>
-                {"<"}
-            </button>
-        );
-
-        for (let i = start; i <= end; i++) {
-            pages.push(
-                <button
-                    key={i}
-                    className={`page-button ${currentPage === i ? "active-button" : ""}`}
-                    onClick={() => updatePageInUrl(i)}
-                >
-                    {i}
-                </button>
-            );
-        }
-
-        if (end < totalPages) {
-            pages.push(<span key="ellipsis">...</span>);
-            pages.push(
-                <button key={totalPages} onClick={() => updatePageInUrl(totalPages)}>
-                    {totalPages}
-                </button>
-            );
-        }
-
-        pages.push(
-            <button key="next" onClick={() => handleNextPage()} disabled={currentPage >= totalPages}>
-                {">"}
-            </button>
-        );
-
-        return pages;
+    const updateComment = (orderId: string, comment: string) => {
+        setCommentInput(current => ({...current, [orderId]: comment}));
     };
 
     const handleEditClick = (orderId: string) => {
@@ -123,7 +105,7 @@ const OrdersTable = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ comment: comment, managerId: "managerId" }),
+                body: JSON.stringify({comment: comment, managerId: "managerId"}),
             });
 
             if (!response.ok) {
@@ -134,9 +116,9 @@ const OrdersTable = () => {
             console.log('Comment added successfully:', updatedOrder);
 
             const newComments = tempComments[orderId] ? [...tempComments[orderId], comment] : [comment];
-            setTempComments({ ...tempComments, [orderId]: newComments });
+            setTempComments({...tempComments, [orderId]: newComments});
 
-            setCommentInput({ ...commentInput, [orderId]: '' });
+            setCommentInput({...commentInput, [orderId]: ''});
         } catch (error) {
             console.error('Error adding comment:', error);
         }
@@ -174,21 +156,12 @@ const OrdersTable = () => {
         }));
     };
 
-
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            updatePageInUrl(currentPage + 1);
-        }
-    };
-
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            updatePageInUrl(currentPage - 1);
-        }
-    };
-
     const toggleRow = (id: string) => {
-        setExpandedRow(expandedRow === id ? null : id);
+        if (expandedRow === id) {
+            dispatch(setExpandedRow(null));
+        } else {
+            dispatch(setExpandedRow(id));
+        }
     };
 
     if (isLoading) {
@@ -227,7 +200,9 @@ const OrdersTable = () => {
                             <td>{order.email || 'N/A'}</td>
                             <td>{order.phone || 'N/A'}</td>
                             <td>{order.age != null ? order.age : 'N/A'}</td>
-                            <td>{order.course || 'N/A'}</td>
+                            <td className={order.course ? `course-${order.course}` : 'course-na'}>
+                                {order.course || 'N/A'}
+                            </td>
                             <td>
                                 {order.course_format === 'online' ? (
                                     <div className="online-format">ONLINE</div>
@@ -237,9 +212,11 @@ const OrdersTable = () => {
                                     'N/A'
                                 )}
                             </td>
-
                             <td>{order.sum != null ? order.sum : 'N/A'}</td>
-                            <td>{order.already_paid != null ? order.already_paid.toString() : 'N/A'}</td>
+                            <td>
+                                {order.already_paid !== null ? (order.already_paid ? 'Yes' : 'No') : 'N/A'}
+                            </td>
+
                             <td>
                                 {order.course_type === 'premium' ? (
                                     <div className="course-type premium">Premium</div>
@@ -257,88 +234,37 @@ const OrdersTable = () => {
                             </td>
                             <td>{order.created_at ? new Date(order.created_at).toISOString().slice(0, -14) : 'N/A'}</td>
                             <td>{order.group || 'N/A'}</td>
-                            <td>{order.manager || 'N/A'}</td>
+                            <td>
+                                {order.manager ? managerLastNames[order.manager] || 'Fetching...' : 'N/A'}
+                            </td>
+
+
                             <td>{order.status || 'N/A'}</td>
                         </tr>
                         {expandedRow === order._id && (
                             <tr className="additional-row">
                                 <td colSpan={15}>
-                                    <div className="additional">
-                                        <div>
-                                            <div>message: {order.msg || 'N/A'}</div>
-                                            <div>utm: {order.utm || 'N/A'}</div>
-                                        </div>
+                                    <div>
+                                        {orders.map((order, index) => (
+                                            <React.Fragment key={order._id}>
+                                                {expandedRow === order._id && (
+                                                    <OrderDetails
+                                                        order={order}
+                                                        commentInput={commentInput[order._id] || ''}
+                                                        tempComments={tempComments[order._id] || []}
+                                                        setCommentInput={setCommentInput}
+                                                        handleAddComment={handleAddComment}
+                                                        editingOrderId={editingOrderId}
+                                                        handleEditClick={() => handleEditClick(order._id)}
+                                                        handleSaveEdit={handleSaveEdit}
+                                                        handleCancelEdit={handleCancelEdit}
+                                                        updateComment={updateComment}
+                                                    />
+                                                )}
+                                            </React.Fragment>
+                                        ))}
 
-                                        <div>
-                                            {orders.map((order, index) => (
-                                                <React.Fragment key={order._id}>
-                                                    <tr onClick={() => toggleRow(order._id)}>
-                                                    </tr>
-                                                    {expandedRow === order._id && (
-                                                        <tr className="additional-row">
-                                                            <td colSpan={15}>
-                                                                <div className="additional">
-                                                                    <div className="comments-section">
-                                                                        {order.comments && order.comments.map((comment, commentIndex) => (
-                                                                            <div key={`persisted-${commentIndex}`} className="comment">
-                                                                                <p>{comment.comment}</p>
-                                                                                <p>Manager ID: {comment.managerId}</p>
-                                                                                <p>Time: {new Date(comment.createdAt).toLocaleString()}</p>
-                                                                            </div>
-                                                                        ))}
-
-                                                                        {tempComments[order._id] && tempComments[order._id].map((tempComment, tempIndex) => (
-                                                                            <div key={`temp-${tempIndex}`} className="comment">
-                                                                                <p>{tempComment}</p>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </React.Fragment>
-                                            ))}
-
-
-                                            <input
-                                                className="add-comment"
-                                                type="text"
-                                                placeholder="Add a comment"
-                                                value={commentInput[order._id] || ''}
-                                                onChange={(e) => setCommentInput({ ...commentInput, [order._id]: e.target.value })}
-                                            />
-                                            <button
-                                                className="global-btn add-comment-btn"
-                                                onClick={() => handleAddComment(order._id)}
-                                            >
-                                                Add
-                                            </button>
-
-                                        </div>
-                                        <button className="global-btn edit-btn" onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleEditClick(order._id);
-                                        }}>Edit</button>
-                                        <table className="edit-table">
-                                            <tbody>
-                                            {expandedRow === order._id && (
-                                                <tr className="additional-row">
-                                                    <td colSpan={15}>
-                                                        {editingOrderId === order._id && (
-                                                            <EditOrder
-                                                                order={order}
-                                                                onSave={handleSaveEdit}
-                                                                onCancel={handleCancelEdit}
-                                                            />
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            )}
-                                            </tbody>
-                                        </table>
                                     </div>
-
                                 </td>
                             </tr>
                         )}
@@ -346,9 +272,7 @@ const OrdersTable = () => {
                 ))}
                 </tbody>
             </table>
-            <div className="pagination-controls">
-                {renderPagination()}
-            </div>
+            <Pagination currentPage={currentPage} totalPages={totalPages} updatePageInUrl={updatePageInUrl}/>
 
         </div>
     );

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useDispatch as reduxUseDispatch } from 'react-redux';
-import type { AppDispatch } from '../store/store';
+import {useState, useEffect} from 'react';
+import {useDispatch as reduxUseDispatch} from 'react-redux';
+import type {AppDispatch} from '../store/store';
 
 export function useDebounce<T>(value: T, delay: number): T {
     const [debouncedValue, setDebouncedValue] = useState<T>(value);

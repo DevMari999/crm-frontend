@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Order, PaginationResult } from '../types/order.types';
+import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
+import {Order, PaginationResult} from '../types/order.types';
 
 interface OrdersState {
     data: Order[];
@@ -9,6 +9,8 @@ interface OrdersState {
     sortBy: string;
     sortOrder: 'asc' | 'desc';
     searchCriteria: Record<string, any>;
+    isRowExpanded: boolean;
+    expandedRowId: string | null;
 }
 
 const initialState: OrdersState = {
@@ -19,13 +21,20 @@ const initialState: OrdersState = {
     sortBy: 'defaultField',
     sortOrder: 'asc',
     searchCriteria: {},
+    isRowExpanded: false,
+    expandedRowId: null,
 };
 
 export const fetchOrders = createAsyncThunk(
     'orders/fetchOrders',
-    async ({ page, sortBy, sortOrder, searchCriteria }:
-               { page: number, sortBy: string, sortOrder: 'asc' | 'desc', searchCriteria: Record<string, any> }): Promise<PaginationResult> => {
-        const queryParams = new URLSearchParams({ page: page.toString(), sortBy, sortOrder });
+    async ({page, sortBy, sortOrder, searchCriteria}:
+               {
+                   page: number,
+                   sortBy: string,
+                   sortOrder: 'asc' | 'desc',
+                   searchCriteria: Record<string, any>
+               }): Promise<PaginationResult> => {
+        const queryParams = new URLSearchParams({page: page.toString(), sortBy, sortOrder});
         queryParams.set('searchCriteria', JSON.stringify(searchCriteria));
         const response = await fetch(`http://localhost:8080/api/orders?${queryParams}`);
         if (!response.ok) {
@@ -50,6 +59,15 @@ const ordersSlice = createSlice({
         setSearchCriteria: (state, action: PayloadAction<Record<string, any>>) => {
             state.searchCriteria = action.payload;
         },
+        toggleRowExpanded: (state) => { // Add this reducer
+            state.isRowExpanded = !state.isRowExpanded;
+        },
+        setRowExpanded: (state, action: PayloadAction<string | null>) => {
+            state.expandedRowId = action.payload;
+        },
+        setExpandedRow: (state, action: PayloadAction<string | null>) => {
+            state.expandedRowId = action.payload;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -67,5 +85,12 @@ const ordersSlice = createSlice({
     },
 });
 
-export const { setCurrentPage,setSortBy, setSearchCriteria } = ordersSlice.actions;
+export const {
+    setCurrentPage,
+    setSortBy,
+    setSearchCriteria,
+    toggleRowExpanded,
+    setRowExpanded,
+    setExpandedRow
+} = ordersSlice.actions;
 export default ordersSlice.reducer;

@@ -2,13 +2,16 @@ import React, {useEffect, useState} from 'react';
 import "./Orders.css";
 import OrdersTable from "../OrdersTable/OrdersTable";
 import {AppDispatch} from "../../store/store";
-import {fetchOrders, setSearchCriteria} from "../../slices/orders.slice";
+import {fetchOrders, setRowExpanded, setSearchCriteria} from "../../slices/orders.slice";
 import {useDispatch} from 'react-redux';
 import {useDebounce} from '../../hooks/custom.hooks';
+import * as XLSX from 'xlsx';
 // @ts-ignore
 import reset from "../../assets/1.png";
 // @ts-ignore
 import exel from "../../assets/2.png";
+import {getUserDetailsFromToken} from "../../utils/tokenUtils";
+
 const Orders = () => {
     const [searchName, setSearchName] = useState('');
     const [searchSurname, setSearchSurname] = useState('');
@@ -38,10 +41,53 @@ const Orders = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const [isRotated, setIsRotated] = useState(false);
+    const [showMyOrders, setShowMyOrders] = useState(false);
+    const handleMyOrdersChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const isChecked = e.target.checked;
+        setShowMyOrders(isChecked);
+
+    };
 
     const handleRotate = () => {
         setIsRotated(!isRotated);
+
+        setSearchName('');
+        setSearchSurname('');
+        setSearchEmail('');
+        setSearchPhone('');
+        setSearchAge('');
+        setSearchCourse('');
+        setSearchFormat('');
+        setSearchType('');
+        setSearchStatus('');
+        setSearchGroup('');
+        setSearchStartDate('');
+        setSearchEndDate('');
+
+        const searchCriteria = {
+            name: '',
+            surname: '',
+            email: '',
+            phone: '',
+            age: '',
+            course: '',
+            format: '',
+            type: '',
+            status: '',
+            group: '',
+            start_date: '',
+            end_date: ''
+        };
+        dispatch(setSearchCriteria(searchCriteria));
+        dispatch(setRowExpanded(null));
+        dispatch(fetchOrders({
+            page: 1,
+            sortBy: 'defaultField',
+            sortOrder: 'asc',
+            searchCriteria
+        }));
     };
+
     useEffect(() => {
         const searchCriteria = {
             name: debouncedSearchName,
@@ -55,7 +101,8 @@ const Orders = () => {
             status: debouncedSearchStatus,
             group: debouncedSearchGroup,
             start_date: debouncedSearchStartDate,
-            end_date: debouncedSearchEndDate
+            end_date: debouncedSearchEndDate,
+            ...(showMyOrders ? {manager: getUserDetailsFromToken().userId} : {})
         };
         dispatch(setSearchCriteria(searchCriteria));
         dispatch(fetchOrders({
@@ -67,7 +114,39 @@ const Orders = () => {
     }, [debouncedSearchName, debouncedSearchSurname, debouncedSearchEmail,
         debouncedSearchPhone, debouncedSearchAge, debouncedSearchCourse,
         debouncedSearchFormat, debouncedSearchType, debouncedSearchStatus, debouncedSearchGroup,
-        debouncedSearchStartDate, debouncedSearchEndDate, dispatch]);
+        debouncedSearchStartDate, debouncedSearchEndDate, showMyOrders, dispatch]);
+    const downloadExcel = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/api/orders');
+            if (!response.ok) throw new Error('Failed to fetch orders');
+
+            const result = await response.json();
+            const ordersArray = result.currentData;
+
+            const worksheet = XLSX.utils.json_to_sheet(ordersArray);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+
+            const excelBuffer = XLSX.write(workbook, {bookType: 'xlsx', type: 'array'});
+            const data = new Blob([excelBuffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            });
+            const url = window.URL.createObjectURL(data);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'orders.xlsx'); // Name the file here
+            document.body.appendChild(link);
+            link.click();
+
+            if (link.parentNode) {
+                link.parentNode.removeChild(link);
+            }
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading Excel file:', error);
+        }
+    };
 
     return (
         <div className="orders">
@@ -124,13 +203,14 @@ const Orders = () => {
                 </div>
                 <div className="extra-filter">
                     <>
-                    <input type="checkbox" id="my-orders"/>
-                    <label htmlFor="my-orders">My</label>
+                        <input type="checkbox" id="my-orders" checked={showMyOrders} onChange={handleMyOrdersChange}/>
+                        <label htmlFor="my-orders">My</label>
                     </>
                     <div className="reset" onClick={handleRotate}>
-                        <img src={reset} alt="reset" className={isRotated ? "rotateBack" : "rotate"} onAnimationEnd={() => setIsRotated(false)} />
+                        <img src={reset} alt="reset" className={isRotated ? "rotateBack" : "rotate"}
+                             onAnimationEnd={() => setIsRotated(false)}/>
                     </div>
-                    <div className="exel">
+                    <div className="exel" onClick={downloadExcel}>
                         <img src={exel} alt="exel"/>
                     </div>
                 </div>

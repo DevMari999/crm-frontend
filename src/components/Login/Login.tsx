@@ -1,5 +1,6 @@
-import React, { FormEvent, useState } from 'react';
+import React, {FormEvent, useState} from 'react';
 import "./Login.css";
+import {getUserDetailsFromToken} from '../../utils/tokenUtils';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -9,16 +10,14 @@ const Login = () => {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        // Basic validation for email format
         if (!email.includes('@')) {
             setErrorMessage('Invalid email format');
             return;
         }
 
-        // Reset error message on successful validation
         setErrorMessage('');
 
-        const requestData = JSON.stringify({ email, password });
+        const requestData = JSON.stringify({email, password});
         console.log('Sending request data:', requestData);
 
         const loginUrl = 'http://localhost:8080/api/auth/login';
@@ -26,30 +25,41 @@ const Login = () => {
         try {
             const response = await fetch(loginUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include', // Important for including cookies in the request
+                headers: {'Content-Type': 'application/json',},
+                credentials: 'include',
                 body: requestData,
             });
 
             if (!response.ok) {
-                console.error('Login failed:', response.statusText);
-                setErrorMessage('Login failed. Please check your credentials.');
+                const errorData = await response.json();
+                console.error('Login failed:', errorData.message || response.statusText);
+                setErrorMessage(errorData.message || 'Login failed. Please check your credentials.');
                 return;
             }
 
             const data = await response.json();
             console.log('Login successful:', data);
+            localStorage.setItem('token', data.token);
 
-            // Redirect user or update UI state based on successful login
-            window.location.href = '/admin'; // Adjust URL as needed
+            try {
+                const decoded = getUserDetailsFromToken();
+                console.log('Decoded token:', decoded);
 
+                if (decoded.userRole === 'admin') { // Adjusted property name
+                    window.location.href = '/admin';
+                } else {
+                    window.location.href = '/orders';
+                }
+            } catch (error) {
+                console.error('Error decoding token:', error);
+                setErrorMessage('An error occurred while decoding the token.');
+            }
         } catch (error) {
             console.error('Error during login:', error);
             setErrorMessage('An error occurred during login.');
         }
     };
+
 
     return (
         <div className="login">
@@ -64,6 +74,7 @@ const Login = () => {
                             id="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            required
                         />
                     </div>
                     <div className="form-field">
@@ -73,6 +84,7 @@ const Login = () => {
                             id="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                     </div>
                     <button className="login-btn" type="submit">Login</button>
