@@ -5,4 +5,22 @@
     background-position: center;
     background-size: cover;
     background-attachment: fixed;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+
+}
+
+.panel {
+    margin-right: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 5px;
+    background-color: rgba(29, 40, 59, 0.4);
+}
+
+.panel-logo{
+    height: 30px;
+    margin: 13px;
+    cursor: pointer;
 }

@@ -191,12 +191,20 @@ const Orders = () => {
                                onChange={(e) => setSearchGroup(e.target.value)}/>
                     </div>
                     <div className="search-field">
-                        <input type="text" placeholder="Start date" value={searchStartDate}
-                               onChange={(e) => setSearchStartDate(e.target.value)}/>
+                        <input
+                            type="date"
+                            placeholder="Start date"
+                            value={searchStartDate}
+                            onChange={(e) => setSearchStartDate(e.target.value)}
+                        />
                     </div>
                     <div className="search-field">
-                        <input type="text" placeholder="End date" value={searchEndDate}
-                               onChange={(e) => setSearchEndDate(e.target.value)}/>
+                        <input
+                            type="date"
+                            placeholder="End date"
+                            value={searchEndDate}
+                            onChange={(e) => setSearchEndDate(e.target.value)}
+                        />
                     </div>
                 </div>
                 <div className="extra-filter">

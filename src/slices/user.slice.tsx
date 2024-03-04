@@ -100,6 +100,65 @@ export const resetPassword = createAsyncThunk(
     }
 );
 
+export const banManager = createAsyncThunk(
+    'users/banManager',
+    async (userId: string, { rejectWithValue }) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/users/managers/ban/${userId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to ban manager');
+            }
+            return await response.json();
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+export const unbanManager = createAsyncThunk(
+    'users/unbanManager',
+    async (userId: string, { rejectWithValue }) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/users/managers/unban/${userId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to unban manager');
+            }
+            return await response.json();
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+export const deleteManager = createAsyncThunk(
+    'users/deleteManager',
+    async (userId: string, { rejectWithValue }) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/users/managers/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete manager');
+            }
+            return userId;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 const usersSlice = createSlice({
     name: 'users',
     initialState,
@@ -153,6 +212,21 @@ const usersSlice = createSlice({
             .addCase(resetPassword.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
+            })
+            .addCase(banManager.fulfilled, (state, action) => {
+                const index = state.managers.findIndex(manager => manager._id === action.payload._id);
+                if (index !== -1) {
+                    state.managers[index].banned = true;
+                }
+            })
+            .addCase(unbanManager.fulfilled, (state, action) => {
+                const index = state.managers.findIndex(manager => manager._id === action.payload._id);
+                if (index !== -1) {
+                    state.managers[index].banned = false;
+                }
+            })
+            .addCase(deleteManager.fulfilled, (state, action) => {
+                state.managers = state.managers.filter(manager => manager._id !== action.payload);
             });
     },
 });

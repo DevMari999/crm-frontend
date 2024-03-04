@@ -40,11 +40,12 @@ const SetPassword: React.FC = () => {
     };
 
     return (
-        <div>
-            <h2>Set New Password</h2>
+        <div className="login">
+            <div className="form-wrapper">
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleSetPassword}>
-                <div>
+            <form className="form" onSubmit={handleSetPassword}>
+                <h2>Set New Password</h2>
+                <div className="form-field">
                     <label htmlFor="password">New Password:</label>
                     <input
                         type="password"
@@ -54,7 +55,7 @@ const SetPassword: React.FC = () => {
                         required
                     />
                 </div>
-                <div>
+                <div className="form-field">
                     <label htmlFor="confirmPassword">Confirm New Password:</label>
                     <input
                         type="password"
@@ -64,8 +65,9 @@ const SetPassword: React.FC = () => {
                         required
                     />
                 </div>
-                <button type="submit">Set Password</button>
+                <button className="login-btn" type="submit">Set Password</button>
             </form>
+                </div>
         </div>
     );
 };

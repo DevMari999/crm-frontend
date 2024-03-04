@@ -8,6 +8,7 @@ export interface UserTypes {
     passwordResetToken: string;
     passwordResetExpires: Date;
     role: string;
+    banned: Boolean;
 }
 
 export interface UserPaginationResult {
