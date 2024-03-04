@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import "./Orders.css";
 import OrdersTable from "../OrdersTable/OrdersTable";
 import {AppDispatch} from "../../store/store";
-import {fetchOrders, setRowExpanded, setSearchCriteria} from "../../slices/orders.slice";
+import {fetchAllOrdersForExcel, fetchOrders, setRowExpanded, setSearchCriteria} from "../../slices/orders.slice";
 import {useDispatch} from 'react-redux';
 import {useDebounce} from '../../hooks/custom.hooks';
 import * as XLSX from 'xlsx';
@@ -63,6 +63,7 @@ const Orders = () => {
         setSearchGroup('');
         setSearchStartDate('');
         setSearchEndDate('');
+        setShowMyOrders(false);
 
         const searchCriteria = {
             name: '',
@@ -116,37 +117,34 @@ const Orders = () => {
         debouncedSearchFormat, debouncedSearchType, debouncedSearchStatus, debouncedSearchGroup,
         debouncedSearchStartDate, debouncedSearchEndDate, showMyOrders, dispatch]);
     const downloadExcel = async () => {
-        try {
-            const response = await fetch('http://localhost:8080/api/orders');
-            if (!response.ok) throw new Error('Failed to fetch orders');
+        dispatch(fetchAllOrdersForExcel())
+            .unwrap()
+            .then((ordersArray) => {
+                console.log("Orders Array:", ordersArray);
+                const worksheet = XLSX.utils.json_to_sheet(ordersArray);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
 
-            const result = await response.json();
-            const ordersArray = result.currentData;
+                const excelBuffer = XLSX.write(workbook, {bookType: 'xlsx', type: 'array'});
+                const data = new Blob([excelBuffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                });
+                const url = window.URL.createObjectURL(data);
 
-            const worksheet = XLSX.utils.json_to_sheet(ordersArray);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'AllOrders.xlsx'); // Name the file here
+                document.body.appendChild(link);
+                link.click();
 
-            const excelBuffer = XLSX.write(workbook, {bookType: 'xlsx', type: 'array'});
-            const data = new Blob([excelBuffer], {
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch((error) => {
+                console.error('Error downloading Excel file:', error);
             });
-            const url = window.URL.createObjectURL(data);
-
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'orders.xlsx'); // Name the file here
-            document.body.appendChild(link);
-            link.click();
-
-            if (link.parentNode) {
-                link.parentNode.removeChild(link);
-            }
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error downloading Excel file:', error);
-        }
     };
+
 
     return (
         <div className="orders">

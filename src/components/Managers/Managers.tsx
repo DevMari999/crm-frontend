@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
-import {fetchManagers} from '../../slices/user.slice';
+import {fetchManagers, generateActivationLinkForManager} from '../../slices/user.slice';
 import {RootState} from '../../store/store';
 import {useDispatch} from '../../hooks/custom.hooks';
 import Pagination from '../Pagination/Pagination';
@@ -15,15 +15,23 @@ const Managers: React.FC = () => {
     const limit = 3;
 
     useEffect(() => {
-        console.log(`Component requesting managers for Page: ${currentPage}, Limit: ${limit}`);
         dispatch(fetchManagers({page: currentPage, limit}));
     }, [dispatch, currentPage, limit]);
 
     const updatePage = (newPage: number) => {
-        console.log(`Updating page to: ${newPage}`);
         setCurrentPage(newPage);
     };
-
+    const handleActivateManager = (userId: string) => {
+        dispatch(generateActivationLinkForManager(userId))
+            .unwrap()
+            .then((response) => {
+                alert('Activation link generated successfully.');
+            })
+            .catch((error) => {
+                console.error('Error generating activation link:', error);
+                alert('Failed to generate activation link.');
+            });
+    };
     return (
         <div>
             {isLoading ? (
@@ -32,6 +40,7 @@ const Managers: React.FC = () => {
                 <>
                     <div>
                         {managers.length > 0 ? (
+
                             managers.map((manager) => (
                                 <div className="each-manager global-block" key={manager.email}>
                                     <ul className="manager-ul">
@@ -42,13 +51,19 @@ const Managers: React.FC = () => {
                                     <div>
                                         <button className="global-btn managers-btn">BAN</button>
                                         <button className="global-btn managers-btn">UNBAN</button>
-                                        <button className="global-btn managers-btn">ACTIVATE</button>
+                                        <button
+                                            className="global-btn managers-btn"
+                                            onClick={() => handleActivateManager(manager._id)}
+                                        >
+                                            ACTIVATE
+                                        </button>
                                         <button className="global-btn managers-btn">DELETE</button>
                                     </div>
                                 </div>
                             ))
                         ) : (
                             <p>No managers found.</p>
+
                         )}
                     </div>
                     <div className="pagination-wrapper">

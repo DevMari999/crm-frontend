@@ -11,7 +11,7 @@
 }
 
 table {
-    width: 97%;
+    width: 98%;
     border-collapse: collapse;
     border-radius: 10px;
     overflow: hidden;
@@ -25,7 +25,7 @@ th, td {
     font-size: 15px;
     font-weight: normal;
     cursor: pointer;
-    height: 55px;
+    height: 57px;
     border-bottom: solid 0.03em #d4d4d4;
 }
 
@@ -40,7 +40,7 @@ thead tr {
 th {
     background-color: transparent;
     color: #ededed;
-    height: 43px;
+    height: 45px;
     background-clip: padding-box;
 }
 
@@ -53,7 +53,7 @@ tr:not(.additional-row, thead tr):hover {
     /*        inset 0 -17px 17px -17px rgba(52, 72, 90, 0.15),*/
     /*        inset 0 17px 17px -17px rgba(52, 72, 90, 0.15);*/
     background: rgba(243, 245, 247, 0.7);
-    box-shadow: 0 2px 3px rgba(203, 203, 203, 0.7);
+    /*box-shadow: 0 2px 3px rgba(203, 203, 203, 0.7);*/
 }
 
 
@@ -63,6 +63,7 @@ tr:not(.additional-row, thead tr):hover {
     font-size: 10px;
     background: linear-gradient(135deg, rgba(24, 85, 31, 0.97) 0%, rgba(124, 191, 112, 0.97) 100%);
     width: 50px;
+    height: 16px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -85,9 +86,10 @@ tr:not(.additional-row, thead tr):hover {
     border-right: solid 0.03em #d4d4d4;
 }
 
-.course-type {
+.course-type, .status {
     font-size: 10px;
     width: 69px;
+    height: 16px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -160,4 +162,27 @@ tr:not(.additional-row, thead tr):hover {
 
 .course-FE {
     color: #801eb9;
+}
+
+
+.in-work {
+    background: linear-gradient(135deg, rgba(37, 126, 16, 0.97) 0%, rgba(203, 233, 71, 0.97) 100%);
+    box-shadow: 0 1px 2px grey;
+}
+
+.pending {
+    background: linear-gradient(135deg, rgba(40, 115, 163, 0.97) 0%, rgba(170, 208, 237, 0.97) 100%);
+    box-shadow: 0 1px 2px grey;
+}
+.cancelled {
+    background: linear-gradient(135deg, rgba(102, 37, 37, 0.97) 0%, rgba(207, 66, 66, 0.97) 100%);
+    box-shadow: 0 1px 2px grey;
+}
+.completed {
+    background: linear-gradient(135deg, rgba(8, 87, 69, 0.97) 0%, rgba(59, 212, 152, 0.97) 100%);
+    box-shadow: 0 1px 2px grey;
+}
+.dubbing {
+    background: linear-gradient(135deg, rgba(87, 87, 87, 0.97) 0%, rgba(170, 170, 170, 0.97) 100%);
+    box-shadow: 0 1px 2px grey;
 }

@@ -1,6 +1,19 @@
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import {Order, PaginationResult} from '../types/order.types';
 
+interface MonthlyOrderStats {
+    _id: {
+        year: number;
+        month: number;
+    };
+    count: number;
+    orders: Order[];
+}
+
+interface CourseTypeStatistics {
+    [courseType: string]: number;
+}
+
 interface OrdersState {
     data: Order[];
     isLoading: boolean;
@@ -11,6 +24,9 @@ interface OrdersState {
     searchCriteria: Record<string, any>;
     isRowExpanded: boolean;
     expandedRowId: string | null;
+    statusStatistics: Record<string, number>;
+    monthlyStats: MonthlyOrderStats[];
+    courseTypeStatistics: CourseTypeStatistics;
 }
 
 const initialState: OrdersState = {
@@ -23,8 +39,21 @@ const initialState: OrdersState = {
     searchCriteria: {},
     isRowExpanded: false,
     expandedRowId: null,
+    statusStatistics: {},
+    monthlyStats: [],
+    courseTypeStatistics: {},
 };
 
+export const fetchCourseTypeStatistics = createAsyncThunk(
+    'orders/fetchCourseTypeStatistics',
+    async (): Promise<CourseTypeStatistics> => {
+        const response = await fetch(`http://localhost:8080/api/course-type-statistics`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return await response.json() as CourseTypeStatistics;
+    }
+);
 export const fetchOrders = createAsyncThunk(
     'orders/fetchOrders',
     async ({page, sortBy, sortOrder, searchCriteria}:
@@ -43,6 +72,41 @@ export const fetchOrders = createAsyncThunk(
         return await response.json() as PaginationResult;
     }
 );
+export const fetchStatusStatistics = createAsyncThunk(
+    'orders/fetchStatusStatistics',
+    async (): Promise<Record<string, number>> => {
+        const response = await fetch(`http://localhost:8080/api/orders/status-statistics`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log('Fetched data:', data);
+        return data as Record<string, number>;
+    }
+);
+
+
+export const fetchOrdersGroupedByMonth = createAsyncThunk(
+    'orders/fetchOrdersGroupedByMonth',
+    async (): Promise<MonthlyOrderStats[]> => {
+        const response = await fetch(`http://localhost:8080/api/orders-by-month`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return await response.json() as MonthlyOrderStats[];
+    }
+);
+
+export const fetchAllOrdersForExcel = createAsyncThunk(
+    'orders/fetchAllOrdersForExcel',
+    async (): Promise<Order[]> => {
+        const response = await fetch(`http://localhost:8080/api/orders/excel`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return await response.json() as Order[];
+    }
+);
 
 
 const ordersSlice = createSlice({
@@ -59,7 +123,7 @@ const ordersSlice = createSlice({
         setSearchCriteria: (state, action: PayloadAction<Record<string, any>>) => {
             state.searchCriteria = action.payload;
         },
-        toggleRowExpanded: (state) => { // Add this reducer
+        toggleRowExpanded: (state) => {
             state.isRowExpanded = !state.isRowExpanded;
         },
         setRowExpanded: (state, action: PayloadAction<string | null>) => {
@@ -81,6 +145,47 @@ const ordersSlice = createSlice({
             })
             .addCase(fetchOrders.rejected, (state) => {
                 state.isLoading = false;
+            })
+            .addCase(fetchStatusStatistics.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchStatusStatistics.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.statusStatistics = action.payload;
+            })
+            .addCase(fetchStatusStatistics.rejected, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(fetchOrdersGroupedByMonth.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchOrdersGroupedByMonth.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.monthlyStats = action.payload;
+            })
+            .addCase(fetchOrdersGroupedByMonth.rejected, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(fetchCourseTypeStatistics.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchCourseTypeStatistics.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.courseTypeStatistics = action.payload; // Set the fetched course type statistics in the state
+            })
+            .addCase(fetchCourseTypeStatistics.rejected, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(fetchAllOrdersForExcel.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchAllOrdersForExcel.fulfilled, (state, action) => {
+                state.isLoading = false;
+                // Optionally, handle the fetched data, such as storing it temporarily for download
+            })
+            .addCase(fetchAllOrdersForExcel.rejected, (state) => {
+                state.isLoading = false;
+                // Optionally, handle the error state
             });
     },
 });

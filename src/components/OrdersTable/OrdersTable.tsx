@@ -237,9 +237,21 @@ const OrdersTable = () => {
                             <td>
                                 {order.manager ? managerLastNames[order.manager] || 'Fetching...' : 'N/A'}
                             </td>
-
-
-                            <td>{order.status || 'N/A'}</td>
+                            <td>
+                                {order.status === 'in work' ? (
+                                    <div className="in-work status">in work</div>
+                                ) : order.status === 'pending' ? (
+                                    <div className="pending status">pending</div>
+                                ) : order.status === 'dubbing' ? (
+                                    <div className="dubbing status">dubbing</div>
+                                ) : order.status === 'cancelled' ? (
+                                    <div className="cancelled status">cancelled</div>
+                                ) : order.status === 'completed' ? (
+                                    <div className="completed status">completed</div>
+                                ) : (
+                                    'N/A'
+                                )}
+                            </td>
                         </tr>
                         {expandedRow === order._id && (
                             <tr className="additional-row">

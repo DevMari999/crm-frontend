@@ -1,7 +1,9 @@
 import React, {useState} from 'react';
 import Managers from "../Managers/Managers";
 import "./AdminPanel.css";
-
+import StatusStatistics from "../StatusStatistics/StatusStatistics";
+import DatesStatistics from "../DatesStatistics/DatesStatistics";
+import CoursesStatistics from "../CoursesStatistics/CoursesStatistics";
 const AdminPanel: React.FC = () => {
     const [name, setName] = useState('');
     const [lastname, setLastname] = useState('');
@@ -33,7 +35,6 @@ const AdminPanel: React.FC = () => {
 
             const responseData = await response.json();
             console.log(responseData);
-            // Close the modal and reset the form
             setIsModalOpen(false);
             setName('');
             setLastname('');
@@ -47,8 +48,12 @@ const AdminPanel: React.FC = () => {
 
     return (
         <div className="admin-panel-wrapper">
+            <div className="all-stats-wrapper">
+                <CoursesStatistics/>
+                <StatusStatistics />
+                <DatesStatistics/>
+            </div>
             <button className="global-btn manager-btn" onClick={() => setIsModalOpen(true)}>CREATE NEW MANAGER</button>
-
             {isModalOpen && (
                 <div className="global-modal manager-modal">
                     <div className="modal-content">

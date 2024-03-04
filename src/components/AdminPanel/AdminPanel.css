@@ -19,3 +19,11 @@
     margin-left: 50px;
     font-size: 14px;
 }
+
+.all-stats-wrapper  {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
+   padding: 20px;
+}

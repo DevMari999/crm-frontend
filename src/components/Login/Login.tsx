@@ -45,7 +45,7 @@ const Login = () => {
                 const decoded = getUserDetailsFromToken();
                 console.log('Decoded token:', decoded);
 
-                if (decoded.userRole === 'admin') { // Adjusted property name
+                if (decoded.userRole === 'admin') {
                     window.location.href = '/admin';
                 } else {
                     window.location.href = '/orders';

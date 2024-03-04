@@ -2,7 +2,7 @@ export interface Comment {
     _id: string;
     managerId: string;
     comment: string;
-    createdAt: string;
+    createdAt: Date;
 }
 
 export interface Order {
@@ -17,7 +17,7 @@ export interface Order {
     course_type: string;
     sum: number | null;
     already_paid: boolean | null;
-    created_at: string;
+    created_at: Date;
     utm: string;
     msg: string | null;
     status: string | null;

@@ -1,0 +1,126 @@
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchStatusStatistics } from '../../slices/orders.slice';
+import { Doughnut } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+interface RootState {
+    orders: {
+        statusStatistics: Array<{ _id: string | null, count: number }>;
+    };
+}
+
+interface ChartDataState {
+    labels: string[];
+    datasets: Array<{
+        data: number[];
+        backgroundColor: string[];
+        hoverBackgroundColor: string[];
+    }>;
+}
+
+export const StatusStatistics: React.FC = () => {
+    const dispatch = useDispatch();
+    const statusStatistics = useSelector((state: RootState) => state.orders.statusStatistics);
+    const [chartData, setChartData] = useState<ChartDataState>({
+        labels: [],
+        datasets: [
+            {
+                data: [],
+                backgroundColor: [],
+                hoverBackgroundColor: [],
+            },
+        ],
+    });
+
+    useEffect(() => {
+        // @ts-ignore
+        dispatch(fetchStatusStatistics());
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (Array.isArray(statusStatistics) && statusStatistics.length > 0) {
+            const labelColorMap: Record<string, string> = {
+                'in work': '#dd506e',
+                'pending': '#28495f',
+                'completed': '#2d572f',
+                'cancelled': 'rgba(57,234,215,0.8)',
+                'dubbing': '#FFCE56',
+            };
+
+            const labels: string[] = [];
+            const data: number[] = [];
+            const backgroundColors: string[] = [];
+
+            statusStatistics.forEach(stat => {
+                const label = stat._id || 'Unknown';
+                const count = stat.count;
+
+                labels.push(label);
+                data.push(count);
+                if (label === 'Unknown' || label === null) {
+                    backgroundColors.push('#631315');
+                } else {
+                    backgroundColors.push(labelColorMap[label] || getRandomColor(label));
+                }
+            });
+
+            setChartData({
+                labels,
+                datasets: [
+                    {
+                        data,
+                        backgroundColor: backgroundColors,
+                        hoverBackgroundColor: backgroundColors,
+                    },
+                ],
+            });
+        }
+    }, [statusStatistics]);
+
+    const getRandomColor = (label: string): string => {
+        return '#' + Math.abs(hashCode(label) % 16777215).toString(16);
+    };
+
+    const hashCode = (str: string): number => {
+        let hash = 0;
+        if (str.length === 0) {
+            return hash;
+        }
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash = hash & hash;
+        }
+        return hash;
+    };
+
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right' as 'right',
+            },
+            tooltip: {
+                callbacks: {
+                    label: (context: any) => {
+                        const label = context.label || '';
+                        const value = context.parsed || 0;
+                        return `${label}: ${value}`;
+                    },
+                },
+            },
+        },
+    };
+
+    return (
+        <div style={{ width: '330px', height: '300px' }}>
+            <Doughnut data={chartData} options={options} />
+        </div>
+    );
+};
+
+export default StatusStatistics;

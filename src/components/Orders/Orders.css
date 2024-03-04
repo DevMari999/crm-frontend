@@ -9,7 +9,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 97%;
+    width: 98%;
 }
 
 .search-fields {
@@ -21,7 +21,7 @@
 }
 
 .search-field {
-    padding: 4px;
+    padding: 5px 4px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -31,7 +31,7 @@
 .search-field input {
     font-size: 15px;
     width: 200px;
-    height: 34px;
+    height: 35px;
     border: 1px solid black;
     background: linear-gradient(145deg, rgba(24, 26, 35, 0.98) 0%, rgba(54, 58, 74, 0.98) 100%);
     padding: 4px 10px;
