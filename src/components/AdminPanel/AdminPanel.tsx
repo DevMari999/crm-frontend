@@ -4,46 +4,38 @@ import "./AdminPanel.css";
 import StatusStatistics from "../StatusStatistics/StatusStatistics";
 import DatesStatistics from "../DatesStatistics/DatesStatistics";
 import CoursesStatistics from "../CoursesStatistics/CoursesStatistics";
+import {useDispatch} from "../../hooks/custom.hooks";
+import {addManager} from "../../slices/user.slice";
 const AdminPanel: React.FC = () => {
     const [name, setName] = useState('');
     const [lastname, setLastname] = useState('');
     const [email, setEmail] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const dispatch = useDispatch();
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        const data = {
+        const managerData = {
             name,
             lastname,
             email,
         };
 
-        try {
-            const response = await fetch('http://localhost:8080/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
+        dispatch(addManager(managerData))
+            .unwrap()
+            .then(responseData => {
+                console.log(responseData);
+                setIsModalOpen(false);
+                setName('');
+                setLastname('');
+                setEmail('');
+                setError(null);
+            })
+            .catch(error => {
+                console.error('Registration failed:', error);
+                setError('Registration failed. Please try again.');
             });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const responseData = await response.json();
-            console.log(responseData);
-            setIsModalOpen(false);
-            setName('');
-            setLastname('');
-            setEmail('');
-            setError(null);
-        } catch (error) {
-            console.error('Registration failed:', error);
-            setError('Registration failed. Please try again.');
-        }
     };
 
     return (

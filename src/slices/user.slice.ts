@@ -1,17 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { UserTypes } from '../types/user.types';
+import {UsersState} from "../types/users.slice.types";
 
-interface UsersState {
-    managers: UserTypes[];
-    pagination: {
-        totalPages: number;
-        currentPage: number;
-        limit: number;
-    };
-    currentUser: UserTypes | null;
-    isLoading: boolean;
-    error: string | null;
-}
 
 const initialState: UsersState = {
     managers: [],
@@ -40,6 +30,33 @@ export const fetchManagers = createAsyncThunk(
     }
 );
 
+
+export const addManager = createAsyncThunk(
+    'users/addManager',
+    async (managerData: { name: string; lastname: string; email: string }, { dispatch, rejectWithValue }) => {
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(managerData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const responseData = await response.json();
+
+            dispatch(fetchManagers({ page: 1, limit: 3 }));
+
+            return responseData;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 export const setCurrentUser = createAsyncThunk(
     'users/setCurrentUser',
     async (userId: string, { rejectWithValue }) => {

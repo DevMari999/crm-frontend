@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector} from 'react-redux';
+import React, {useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
 import {
     fetchManagers,
     generateActivationLinkForManager,
@@ -7,7 +7,7 @@ import {
     unbanManager,
     deleteManager, // Make sure these are imported from your slice
 } from '../../slices/user.slice';
-import { RootState } from '../../store/store';
+import {RootState} from '../../store/store';
 import Pagination from '../Pagination/Pagination';
 import './Managers.css';
 import {useDispatch} from "../../hooks/custom.hooks";
@@ -21,7 +21,7 @@ const Managers: React.FC = () => {
     const limit = 3;
 
     useEffect(() => {
-        dispatch(fetchManagers({ page: currentPage, limit }));
+        dispatch(fetchManagers({page: currentPage, limit}));
     }, [dispatch, currentPage, limit]);
 
     const updatePage = (newPage: number) => {
@@ -50,7 +50,7 @@ const Managers: React.FC = () => {
                 .unwrap()
                 .then(() => {
                     alert('Manager banned successfully.');
-                    dispatch(fetchManagers({ page: currentPage, limit })); // Refresh the list
+                    dispatch(fetchManagers({page: currentPage, limit}));
                 })
                 .catch((error: unknown) => {
                     alert('Failed to ban manager.');
@@ -60,7 +60,7 @@ const Managers: React.FC = () => {
                 .unwrap()
                 .then(() => {
                     alert('Manager unbanned successfully.');
-                    dispatch(fetchManagers({ page: currentPage, limit })); // Refresh the list
+                    dispatch(fetchManagers({page: currentPage, limit}));
                 })
                 .catch((error: unknown) => {
                     alert('Failed to unban manager.');
@@ -73,12 +73,27 @@ const Managers: React.FC = () => {
             .unwrap()
             .then(() => {
                 alert('Manager deleted successfully.');
-                dispatch(fetchManagers({ page: currentPage, limit })); // Refresh the list
+
+                const isLastManagerOnPage = managers.length === 1;
+
+                let newCurrentPage = currentPage;
+                if (isLastManagerOnPage && currentPage > 1) {
+                    newCurrentPage = currentPage - 1;
+                }
+
+                setCurrentPage(newCurrentPage);
+
+                dispatch(fetchManagers({page: newCurrentPage, limit}));
             })
             .catch((error: unknown) => {
-                alert('Failed to delete manager.');
+                let errorMessage = 'Failed to delete manager.';
+                if (error instanceof Error) {
+                    errorMessage = error.message;
+                }
+                alert(errorMessage);
             });
     };
+
 
     return (
         <div>
@@ -97,9 +112,11 @@ const Managers: React.FC = () => {
                                     </ul>
                                     <div>
                                         {manager.banned ? (
-                                            <button className="global-btn managers-btn" onClick={() => handleBanUnbanManager(manager._id, false)}>UNBAN</button>
+                                            <button className="global-btn managers-btn"
+                                                    onClick={() => handleBanUnbanManager(manager._id, false)}>UNBAN</button>
                                         ) : (
-                                            <button className="global-btn managers-btn" onClick={() => handleBanUnbanManager(manager._id, true)}>BAN</button>
+                                            <button className="global-btn managers-btn"
+                                                    onClick={() => handleBanUnbanManager(manager._id, true)}>BAN</button>
                                         )}
 
                                         <button
@@ -109,7 +126,9 @@ const Managers: React.FC = () => {
                                             {manager.password ? 'RESET PASSWORD' : 'ACTIVATE'}
                                         </button>
 
-                                        <button className="global-btn managers-btn" onClick={() => handleDeleteManager(manager._id)}>DELETE</button>
+                                        <button className="global-btn managers-btn"
+                                                onClick={() => handleDeleteManager(manager._id)}>DELETE
+                                        </button>
                                     </div>
                                 </div>
                             ))
@@ -118,11 +137,11 @@ const Managers: React.FC = () => {
                         )}
                     </div>
                     <div className="pagination-wrapper">
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={pagination.totalPages}
-                        updatePageInUrl={updatePage}
-                    />
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={pagination.totalPages}
+                            updatePageInUrl={updatePage}
+                        />
                     </div>
                 </>
             )}

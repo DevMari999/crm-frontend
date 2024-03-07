@@ -8,11 +8,12 @@ import edit from "../../assets/edit.png";
 import dlt from "../../assets/delete2.png";
 // @ts-ignore
 import dltHover from "../../assets/delete-hover.png";
+import {useDispatch} from "../../hooks/custom.hooks";
+import {deleteCommentFromOrder} from "../../slices/orders.slice";
 
 interface OrderDetailsProps {
     order: Order;
     commentInput: string;
-    tempComments: string[];
     setCommentInput: React.Dispatch<React.SetStateAction<{ [orderId: string]: string }>>;
     handleAddComment: (orderId: string) => Promise<void>;
     editingOrderId: string | null;
@@ -25,7 +26,6 @@ interface OrderDetailsProps {
 const OrderDetails: React.FC<OrderDetailsProps> = ({
                                                        order,
                                                        commentInput,
-                                                       tempComments,
                                                        handleAddComment,
                                                        editingOrderId,
                                                        handleEditClick,
@@ -35,16 +35,20 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                                                    }) => {
 
     const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
+    const token = localStorage.getItem('token');
+    const dispatch = useDispatch();
 
     const handleDeleteComment = async (commentId: string, isPersisted: boolean, commentIndex: number) => {
-        if (isPersisted) {
+        if (isPersisted && token) {
             try {
-                await fetch(`http://localhost:8080/api/orders/${order._id}/comments/${commentId}`, {method: 'DELETE'});
+
+                await dispatch(deleteCommentFromOrder({ orderId: order._id, commentId, token })).unwrap();
+
+                console.log("Comment deleted successfully.");
             } catch (error) {
                 console.error("Failed to delete comment:", error);
             }
         } else {
-
         }
     };
 
@@ -78,11 +82,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                         </div>
                     ))}
 
-                    {tempComments && tempComments.map((tempComment, tempIndex) => (
-                        <div key={`temp-${tempIndex}`} className="comment global-block">
-                            <p>{tempComment}</p>
-                        </div>
-                    ))}
                 </div>
                 <div className="comment-text-area">
                     <textarea

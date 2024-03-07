@@ -1,33 +1,8 @@
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import {Order, PaginationResult} from '../types/order.types';
+import {RootState} from "../store/store";
+import {CourseTypeStatistics, MonthlyOrderStats, OrdersState} from "../types/orders.slice.types";
 
-interface MonthlyOrderStats {
-    _id: {
-        year: number;
-        month: number;
-    };
-    count: number;
-    orders: Order[];
-}
-
-interface CourseTypeStatistics {
-    [courseType: string]: number;
-}
-
-interface OrdersState {
-    data: Order[];
-    isLoading: boolean;
-    currentPage: number;
-    totalPages: number;
-    sortBy: string;
-    sortOrder: 'asc' | 'desc';
-    searchCriteria: Record<string, any>;
-    isRowExpanded: boolean;
-    expandedRowId: string | null;
-    statusStatistics: Record<string, number>;
-    monthlyStats: MonthlyOrderStats[];
-    courseTypeStatistics: CourseTypeStatistics;
-}
 
 const initialState: OrdersState = {
     data: [],
@@ -72,6 +47,71 @@ export const fetchOrders = createAsyncThunk(
         return await response.json() as PaginationResult;
     }
 );
+
+
+export const addCommentToOrder = createAsyncThunk(
+    'orders/addCommentToOrder',
+    async ({ orderId, comment, managerId, token }: { orderId: string; comment: string; managerId: string; token: string }, { dispatch, rejectWithValue }) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/orders/${orderId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ comment, managerId }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to add the comment.');
+            }
+
+            const updatedOrderOrComment = await response.json();
+
+
+            return updatedOrderOrComment;
+        } catch (error: any) {
+            return rejectWithValue(error.toString());
+        }
+    }
+);
+
+
+export const deleteCommentFromOrder = createAsyncThunk(
+    'orders/deleteCommentFromOrder',
+    async ({ orderId, commentId, token }: { orderId: string; commentId: string; token: string }, { dispatch, getState, rejectWithValue }) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/orders/${orderId}/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete the comment.');
+            }
+
+            const state = getState() as RootState;
+            const { currentPage, sortBy, sortOrder, searchCriteria } = state.orders;
+
+            dispatch(fetchOrders({
+                page: currentPage,
+                sortBy,
+                sortOrder,
+                searchCriteria
+            }));
+
+            return commentId;
+        } catch (error: any) {
+            return rejectWithValue(error.toString());
+        }
+    }
+);
+
+
+
 export const fetchStatusStatistics = createAsyncThunk(
     'orders/fetchStatusStatistics',
     async (): Promise<Record<string, number>> => {
@@ -181,12 +221,24 @@ const ordersSlice = createSlice({
             })
             .addCase(fetchAllOrdersForExcel.fulfilled, (state, action) => {
                 state.isLoading = false;
-                // Optionally, handle the fetched data, such as storing it temporarily for download
             })
             .addCase(fetchAllOrdersForExcel.rejected, (state) => {
                 state.isLoading = false;
-                // Optionally, handle the error state
-            });
+
+            })
+            .addCase(addCommentToOrder.fulfilled, (state, action) => {
+
+                const index = state.data.findIndex(order => order._id === action.meta.arg.orderId);
+                if (index !== -1) {
+
+                    state.data[index].comments.push(action.payload);
+                }
+            })
+
+            .addCase(deleteCommentFromOrder.fulfilled, (state, action) => {
+
+            })
+
     },
 });
 

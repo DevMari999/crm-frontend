@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { fetchStatusStatistics } from '../../slices/orders.slice';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import {useDispatch} from "../../hooks/custom.hooks";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -36,7 +37,6 @@ export const StatusStatistics: React.FC = () => {
     });
 
     useEffect(() => {
-        // @ts-ignore
         dispatch(fetchStatusStatistics());
     }, [dispatch]);
 

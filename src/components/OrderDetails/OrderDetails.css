@@ -5,12 +5,13 @@
 }
 
 .additional {
-    min-height: 230px;
+    min-height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 60px 30px;
     position: relative;
+    padding: 20px 0;
 }
 
 .additional-info {
@@ -55,7 +56,7 @@
 }
 
 .comment {
-    margin-top: 15px;
+    margin: 20px 0;
     border-bottom: solid 0.03em #f5f6f8;
     width: 750px;
     position: relative;

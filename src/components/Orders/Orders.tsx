@@ -133,7 +133,7 @@ const Orders = () => {
 
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'AllOrders.xlsx'); // Name the file here
+                link.setAttribute('download', 'AllOrders.xlsx');
                 document.body.appendChild(link);
                 link.click();
 

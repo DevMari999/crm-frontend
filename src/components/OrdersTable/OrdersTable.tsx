@@ -2,12 +2,12 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux'
 import {useNavigate, useLocation} from 'react-router-dom';
 import {AppDispatch, RootState} from '../../store/store';
-import {fetchOrders, setCurrentPage, setExpandedRow, setSortBy} from '../../slices/orders.slice';
+import {addCommentToOrder, fetchOrders, setCurrentPage, setExpandedRow, setSortBy} from '../../slices/orders.slice';
 import './OrdersTable.css';
 import {Order} from "../../types/order.types";
 import Pagination from "../Pagination/Pagination";
 import OrderDetails from "../OrderDetails/OrderDetails";
-import {CommentInput, TempComments} from "../../types/order.types";
+import {CommentInput} from "../../types/order.types";
 
 const OrdersTable = () => {
     const navigate = useNavigate();
@@ -23,7 +23,6 @@ const OrdersTable = () => {
     const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
     const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
     const [commentInput, setCommentInput] = useState<CommentInput>({});
-    const [tempComments, setTempComments] = useState<TempComments>({});
     const expandedRow = useSelector((state: RootState) => state.orders.expandedRowId);
     const [managerLastNames, setManagerLastNames] = useState<Record<string, string>>({});
     const fetchedManagerIds = useRef(new Set());
@@ -64,6 +63,7 @@ const OrdersTable = () => {
     const handleEditClick = (orderId: string) => {
         setEditingOrderId(orderId);
     };
+    const token = localStorage.getItem('token');
 
     const handleSaveEdit = async (orderId: string, updatedOrderData: Partial<Order>) => {
         try {
@@ -71,6 +71,7 @@ const OrdersTable = () => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify(updatedOrderData),
             });
@@ -97,32 +98,26 @@ const OrdersTable = () => {
 
     const handleAddComment = async (orderId: string) => {
         const comment = commentInput[orderId];
-        if (!comment) return;
+        if (!comment || !token) return;
 
-        try {
-            const response = await fetch(`http://localhost:8080/api/orders/${orderId}/comments`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({comment: comment, managerId: "managerId"}),
+        dispatch(addCommentToOrder({ orderId, comment, managerId: "managerId", token }))
+            .unwrap()
+            .then(() => {
+                console.log('Comment added successfully');
+
+                setCommentInput(current => ({...current, [orderId]: ''}));
+                dispatch(fetchOrders({
+                    page: currentPage,
+                    sortBy,
+                    sortOrder,
+                    searchCriteria,
+                }));
+            })
+            .catch((error) => {
+                console.error('Error adding comment:', error);
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to add the comment.');
-            }
-
-            const updatedOrder = await response.json();
-            console.log('Comment added successfully:', updatedOrder);
-
-            const newComments = tempComments[orderId] ? [...tempComments[orderId], comment] : [comment];
-            setTempComments({...tempComments, [orderId]: newComments});
-
-            setCommentInput({...commentInput, [orderId]: ''});
-        } catch (error) {
-            console.error('Error adding comment:', error);
-        }
     };
+
 
 
     const handleCancelEdit = () => {
@@ -263,7 +258,6 @@ const OrdersTable = () => {
                                                     <OrderDetails
                                                         order={order}
                                                         commentInput={commentInput[order._id] || ''}
-                                                        tempComments={tempComments[order._id] || []}
                                                         setCommentInput={setCommentInput}
                                                         handleAddComment={handleAddComment}
                                                         editingOrderId={editingOrderId}
