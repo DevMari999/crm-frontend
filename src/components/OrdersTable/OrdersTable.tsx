@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux'
 import {useNavigate, useLocation} from 'react-router-dom';
 import {AppDispatch, RootState} from '../../store/store';
-import {addCommentToOrder, fetchOrders, setCurrentPage, setExpandedRow, setSortBy} from '../../slices/orders.slice';
+import { fetchOrders, setCurrentPage, setExpandedRow, setSortBy} from '../../slices/orders.slice';
 import './OrdersTable.css';
 import {Order} from "../../types/order.types";
 import Pagination from "../Pagination/Pagination";
@@ -21,7 +21,6 @@ const OrdersTable = () => {
     const sortBy = useSelector((state: RootState) => state.orders.sortBy);
     const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
     const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
-    const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
     const [commentInput, setCommentInput] = useState<CommentInput>({});
     const expandedRow = useSelector((state: RootState) => state.orders.expandedRowId);
     const [managerLastNames, setManagerLastNames] = useState<Record<string, string>>({});
@@ -55,74 +54,6 @@ const OrdersTable = () => {
         });
     }, [orders]);
 
-
-    const updateComment = (orderId: string, comment: string) => {
-        setCommentInput(current => ({...current, [orderId]: comment}));
-    };
-
-    const handleEditClick = (orderId: string) => {
-        setEditingOrderId(orderId);
-    };
-    const token = localStorage.getItem('token');
-
-    const handleSaveEdit = async (orderId: string, updatedOrderData: Partial<Order>) => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/orders/${orderId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify(updatedOrderData),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update the order.');
-            }
-
-            const updatedOrder = await response.json();
-            console.log('Order updated successfully:', updatedOrder);
-
-            dispatch(fetchOrders({
-                page: currentPage,
-                sortBy,
-                sortOrder,
-                searchCriteria,
-            }));
-
-            setEditingOrderId(null);
-        } catch (error) {
-            console.error('Error updating order:', error);
-        }
-    };
-
-    const handleAddComment = async (orderId: string) => {
-        const comment = commentInput[orderId];
-        if (!comment || !token) return;
-
-        dispatch(addCommentToOrder({ orderId, comment, managerId: "managerId", token }))
-            .unwrap()
-            .then(() => {
-                console.log('Comment added successfully');
-
-                setCommentInput(current => ({...current, [orderId]: ''}));
-                dispatch(fetchOrders({
-                    page: currentPage,
-                    sortBy,
-                    sortOrder,
-                    searchCriteria,
-                }));
-            })
-            .catch((error) => {
-                console.error('Error adding comment:', error);
-            });
-    };
-
-
-
-    const handleCancelEdit = () => {
-        setEditingOrderId(null);
-    };
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
         const pageFromUrl = parseInt(queryParams.get('page') || '1');
@@ -259,12 +190,6 @@ const OrdersTable = () => {
                                                         order={order}
                                                         commentInput={commentInput[order._id] || ''}
                                                         setCommentInput={setCommentInput}
-                                                        handleAddComment={handleAddComment}
-                                                        editingOrderId={editingOrderId}
-                                                        handleEditClick={() => handleEditClick(order._id)}
-                                                        handleSaveEdit={handleSaveEdit}
-                                                        handleCancelEdit={handleCancelEdit}
-                                                        updateComment={updateComment}
                                                     />
                                                 )}
                                             </React.Fragment>

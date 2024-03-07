@@ -1,14 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {Order} from "../../types/order.types";
 import './EditOrder.css';
+import {useDispatch} from "../../hooks/custom.hooks";
+import {fetchOrders} from "../../slices/orders.slice";
+import {useSelector} from "react-redux";
+import {RootState} from "../../store/store";
 
 interface EditOrderProps {
     order: Order;
-    onSave: (orderId: string, updatedOrder: Partial<Order>) => void;
-    onCancel: () => void;
 }
 
-const EditOrder: React.FC<EditOrderProps> = ({order, onSave, onCancel}) => {
+const EditOrder: React.FC<EditOrderProps> = ({order}) => {
     const [editData, setEditData] = useState<Partial<Order>>({
         name: order.name,
         surname: order.surname,
@@ -25,33 +27,71 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onSave, onCancel}) => {
         manager: order.manager,
         msg: order.msg,
     });
-
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement> | React.ChangeEvent<HTMLTextAreaElement>
-    ) => {
-        const {name, value, type} = e.target;
-
-        if (e.target instanceof HTMLInputElement && type === 'checkbox') {
-            const {checked} = e.target;
-            setEditData({...editData, [name]: checked});
-        } else {
-            setEditData({...editData, [name]: value});
-        }
+    const [isVisible, setIsVisible] = useState(true);
+    const dispatch = useDispatch();
+    const currentPage = useSelector((state: RootState) => state.orders.currentPage);
+    const sortBy = useSelector((state: RootState) => state.orders.sortBy);
+    const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
+    const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
+        const target = e.target;
+        const value = target.type === 'checkbox' ? (target as HTMLInputElement).checked : target.value;
+        setEditData(prev => ({
+            ...prev,
+            [target.name]: value
+        }));
     };
 
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onSave(order._id, editData);
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            console.error("No token found");
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/orders/${order._id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(editData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update the order.');
+            }
+
+            const updatedOrder = await response.json();
+            console.log('Order updated successfully:', updatedOrder);
+
+            dispatch(fetchOrders({
+                page: currentPage,
+                sortBy,
+                sortOrder,
+                searchCriteria,
+            }));
+
+            setIsVisible(false);
+        } catch (error) {
+            console.error('Error updating order:', error);
+        }
+    };
+    const handleCancelEdit = () => {
+        setIsVisible(false);
     };
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
-
         return () => {
             document.body.style.overflow = 'auto';
         };
     }, []);
+
+    if (!isVisible) return null;
 
     return (
         <div className="edit-order global-modal">
@@ -142,7 +182,7 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onSave, onCancel}) => {
                     <input name="group" type="text" value={editData.group || ''} onChange={handleChange}/>
                 </label>
                 <button type="submit">Save</button>
-                <button type="button" onClick={onCancel}>Cancel</button>
+                <button type="button" onClick={handleCancelEdit}>Cancel</button>
             </form>
         </div>
     );

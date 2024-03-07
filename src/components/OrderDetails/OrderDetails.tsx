@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Order} from "../../types/order.types";
+import {CommentInput, Order} from "../../types/order.types";
 import EditOrder from "../EditOrder/EditOrder";
 import './OrderDetails.css';
 // @ts-ignore
@@ -9,34 +9,55 @@ import dlt from "../../assets/delete2.png";
 // @ts-ignore
 import dltHover from "../../assets/delete-hover.png";
 import {useDispatch} from "../../hooks/custom.hooks";
-import {deleteCommentFromOrder} from "../../slices/orders.slice";
+import {addCommentToOrder, deleteCommentFromOrder, fetchOrders} from "../../slices/orders.slice";
+import {useSelector} from "react-redux";
+import {RootState} from "../../store/store";
 
 interface OrderDetailsProps {
     order: Order;
     commentInput: string;
     setCommentInput: React.Dispatch<React.SetStateAction<{ [orderId: string]: string }>>;
-    handleAddComment: (orderId: string) => Promise<void>;
-    editingOrderId: string | null;
-    handleEditClick: () => void;
-    handleSaveEdit: (orderId: string, updatedOrderData: Partial<Order>) => Promise<void>;
-    handleCancelEdit: () => void;
-    updateComment: (orderId: string, comment: string) => void;
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({
                                                        order,
-                                                       commentInput,
-                                                       handleAddComment,
-                                                       editingOrderId,
-                                                       handleEditClick,
-                                                       handleSaveEdit,
-                                                       handleCancelEdit,
-                                                       updateComment
                                                    }) => {
 
     const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
     const token = localStorage.getItem('token');
     const dispatch = useDispatch();
+    const [commentInput, setCommentInput] = useState<CommentInput>({});
+    const currentPage = useSelector((state: RootState) => state.orders.currentPage);
+    const sortBy = useSelector((state: RootState) => state.orders.sortBy);
+    const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
+    const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
+    const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+
+    const updateComment = (orderId: string, comment: string) => {
+        setCommentInput(current => ({...current, [orderId]: comment}));
+    };
+    const handleAddComment = async (orderId: string) => {
+        const comment = commentInput[orderId];
+        if (!comment || !token) return;
+
+        dispatch(addCommentToOrder({ orderId, comment, managerId: "managerId", token }))
+            .unwrap()
+            .then(() => {
+                console.log('Comment added successfully');
+
+                setCommentInput(current => ({...current, [orderId]: ''}));
+                dispatch(fetchOrders({
+                    page: currentPage,
+                    sortBy,
+                    sortOrder,
+                    searchCriteria,
+                }));
+            })
+            .catch((error) => {
+                console.error('Error adding comment:', error);
+            });
+    };
+
 
     const handleDeleteComment = async (commentId: string, isPersisted: boolean, commentIndex: number) => {
         if (isPersisted && token) {
@@ -51,7 +72,9 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
         } else {
         }
     };
-
+    const handleEditClick = (orderId: string) => {
+        setEditingOrderId(orderId);
+    };
     return (
         <div className="additional">
             <div className="additional-info">
@@ -87,7 +110,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                     <textarea
                         className="add-comment"
                         placeholder="Add a comment"
-                        value={commentInput || ''}
+                        value={commentInput[order._id] || ''}
                         onChange={(e) => updateComment(order._id, e.target.value)}
                     />
                     <button
@@ -98,14 +121,13 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                     </button>
                 </div>
             </div>
-            <div className="edit-btn" onClick={handleEditClick}>
+            <div className="edit-btn" onClick={() => handleEditClick(order._id)}>
                 <img src={edit} alt="edit"/>
             </div>
+
             {editingOrderId === order._id && (
                 <EditOrder
                     order={order}
-                    onSave={handleSaveEdit}
-                    onCancel={handleCancelEdit}
                 />
             )}
         </div>
