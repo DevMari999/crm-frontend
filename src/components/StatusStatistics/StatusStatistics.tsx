@@ -44,10 +44,10 @@ export const StatusStatistics: React.FC = () => {
         if (Array.isArray(statusStatistics) && statusStatistics.length > 0) {
             const labelColorMap: Record<string, string> = {
                 'in work': '#dd506e',
-                'pending': '#28495f',
+                'pending': '#102b3c',
                 'completed': '#2d572f',
-                'cancelled': 'rgba(57,234,215,0.8)',
-                'dubbing': '#FFCE56',
+                'cancelled': 'rgba(64,185,172,0.8)',
+                'dubbing': '#f4d15d',
             };
 
             const labels: string[] = [];

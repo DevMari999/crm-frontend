@@ -1,17 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import "./Orders.css";
 import OrdersTable from "../OrdersTable/OrdersTable";
-import {AppDispatch} from "../../store/store";
 import {fetchAllOrdersForExcel, fetchOrders, setRowExpanded, setSearchCriteria} from "../../slices/orders.slice";
-import {useDispatch} from 'react-redux';
+import { useSelector} from 'react-redux';
+import {useDispatch} from "../../hooks/custom.hooks";
 import {useDebounce} from '../../hooks/custom.hooks';
 import * as XLSX from 'xlsx';
-// @ts-ignore
 import reset from "../../assets/1.png";
-// @ts-ignore
 import exel from "../../assets/2.png";
-import {getUserDetailsFromToken} from "../../utils/tokenUtils";
-
+import { selectUserId } from "../../slices/auth.slice";
 const Orders = () => {
     const [searchName, setSearchName] = useState('');
     const [searchSurname, setSearchSurname] = useState('');
@@ -39,7 +36,8 @@ const Orders = () => {
     const debouncedSearchStartDate = useDebounce(searchStartDate, 500);
     const debouncedSearchEndDate = useDebounce(searchEndDate, 500);
 
-    const dispatch = useDispatch<AppDispatch>();
+    const dispatch = useDispatch();
+    const currentUserId = useSelector(selectUserId);
     const [isRotated, setIsRotated] = useState(false);
     const [showMyOrders, setShowMyOrders] = useState(false);
     const handleMyOrdersChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,13 +101,13 @@ const Orders = () => {
             group: debouncedSearchGroup,
             start_date: debouncedSearchStartDate,
             end_date: debouncedSearchEndDate,
-            ...(showMyOrders ? {manager: getUserDetailsFromToken().userId} : {})
+            ...(showMyOrders ? { manager: currentUserId } : {}),
         };
         dispatch(setSearchCriteria(searchCriteria));
         dispatch(fetchOrders({
             page: 1,
-            sortBy: 'defaultField',
-            sortOrder: 'asc',
+            sortBy: 'created_at',
+            sortOrder: 'desc',
             searchCriteria
         }));
     }, [debouncedSearchName, debouncedSearchSurname, debouncedSearchEmail,
@@ -171,20 +169,55 @@ const Orders = () => {
                                onChange={(e) => setSearchAge(e.target.value)}/>
                     </div>
                     <div className="search-field">
-                        <input type="text" placeholder="Course" value={searchCourse}
-                               onChange={(e) => setSearchCourse(e.target.value)}/>
+                        <select
+                            value={searchCourse}
+                            onChange={(e) => setSearchCourse(e.target.value)}
+                        >
+                            <option value="">Course</option>
+                            <option value="QACX">QACX</option>
+                            <option value="PCX">PCX</option>
+                            <option value="JSCX">JSCX</option>
+                            <option value="JCX">JCX</option>
+                            <option value="FS">FS</option>
+                            <option value="FE">FE</option>
+                        </select>
+                    </div>
+
+                    <div className="search-field">
+                        <select
+                            value={searchCourse}
+                            onChange={(e) => setSearchFormat(e.target.value)}
+                        >
+                            <option value="">Format</option>
+                            <option value="static">static</option>
+                            <option value="online">online</option>
+
+                        </select>
                     </div>
                     <div className="search-field">
-                        <input type="text" placeholder="Format" value={searchFormat}
-                               onChange={(e) => setSearchFormat(e.target.value)}/>
+                        <select
+                            value={searchCourse}
+                            onChange={(e) => setSearchType(e.target.value)}
+                        >
+                            <option value="">Type</option>
+                            <option value="pro">pro</option>
+                            <option value="minimal">minimal</option>
+                            <option value="vip">vip</option>
+                            <option value="incubator">incubator</option>
+                        </select>
                     </div>
                     <div className="search-field">
-                        <input type="text" placeholder="Type" value={searchType}
-                               onChange={(e) => setSearchType(e.target.value)}/>
-                    </div>
-                    <div className="search-field">
-                        <input type="text" placeholder="Satus" value={searchStatus}
-                               onChange={(e) => setSearchStatus(e.target.value)}/>
+                        <select
+                            value={searchCourse}
+                            onChange={(e) => setSearchStatus(e.target.value)}
+                        >
+                            <option value="">Status</option>
+                            <option value="cancelled">cancelled</option>
+                            <option value="completed">completed</option>
+                            <option value="dubbing">dubbing</option>
+                            <option value="in work">in work</option>
+                            <option value="pending">pending</option>
+                        </select>
                     </div>
                     <div className="search-field">
                         <input type="text" placeholder="Group" value={searchGroup}

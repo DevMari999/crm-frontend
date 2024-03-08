@@ -20,7 +20,6 @@
     "noEmit": true,
     "jsx": "preserve"
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src/**/*", "custom.d.ts"],
+  "exclude": ["node_modules"]
 }

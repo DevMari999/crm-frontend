@@ -4,10 +4,10 @@ import {useNavigate, useLocation} from 'react-router-dom';
 import {AppDispatch, RootState} from '../../store/store';
 import { fetchOrders, setCurrentPage, setExpandedRow, setSortBy} from '../../slices/orders.slice';
 import './OrdersTable.css';
-import {Order} from "../../types/order.types";
 import Pagination from "../Pagination/Pagination";
 import OrderDetails from "../OrderDetails/OrderDetails";
 import {CommentInput} from "../../types/order.types";
+import Loader from "../Loader/Loader";
 
 const OrdersTable = () => {
     const navigate = useNavigate();
@@ -29,6 +29,7 @@ const OrdersTable = () => {
     useEffect(() => {
         orders.forEach((order) => {
             const managerId = order.manager;
+
             if (managerId && !fetchedManagerIds.current.has(managerId)) {
                 fetchedManagerIds.current.add(managerId);
                 fetch(`http://localhost:8080/api/users/${managerId}`)
@@ -91,7 +92,7 @@ const OrdersTable = () => {
     };
 
     if (isLoading) {
-        return <p>Loading orders...</p>;
+        return <Loader />;
     }
 
     return (
@@ -161,7 +162,7 @@ const OrdersTable = () => {
                             <td>{order.created_at ? new Date(order.created_at).toISOString().slice(0, -14) : 'N/A'}</td>
                             <td>{order.group || 'N/A'}</td>
                             <td>
-                                {order.manager ? managerLastNames[order.manager] || 'Fetching...' : 'N/A'}
+                                {order.manager ? managerLastNames[order.manager] || 'user deleted' : 'N/A'}
                             </td>
                             <td>
                                 {order.status === 'in work' ? (

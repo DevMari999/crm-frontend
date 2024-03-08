@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState} from 'react';
 import {CommentInput, Order} from "../../types/order.types";
 import EditOrder from "../EditOrder/EditOrder";
 import './OrderDetails.css';
@@ -12,7 +12,8 @@ import {useDispatch} from "../../hooks/custom.hooks";
 import {addCommentToOrder, deleteCommentFromOrder, fetchOrders} from "../../slices/orders.slice";
 import {useSelector} from "react-redux";
 import {RootState} from "../../store/store";
-
+import {restoreScrollPosition} from "../../utils/scrollPositionUtils";
+import {selectUserId} from "../../slices/auth.slice";
 interface OrderDetailsProps {
     order: Order;
     commentInput: string;
@@ -24,7 +25,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                                                    }) => {
 
     const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
-    const token = localStorage.getItem('token');
     const dispatch = useDispatch();
     const [commentInput, setCommentInput] = useState<CommentInput>({});
     const currentPage = useSelector((state: RootState) => state.orders.currentPage);
@@ -32,26 +32,35 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
     const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
     const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
     const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+    const currentUserId = useSelector(selectUserId);
+
+    const canEdit = !order.manager || order.manager === currentUserId;
 
     const updateComment = (orderId: string, comment: string) => {
         setCommentInput(current => ({...current, [orderId]: comment}));
     };
     const handleAddComment = async (orderId: string) => {
         const comment = commentInput[orderId];
-        if (!comment || !token) return;
+        if (!comment) return;
 
-        dispatch(addCommentToOrder({ orderId, comment, managerId: "managerId", token }))
+        const currentScrollPosition = window.scrollY;
+
+        dispatch(addCommentToOrder({ orderId, comment, managerId: "managerId" }))
             .unwrap()
             .then(() => {
                 console.log('Comment added successfully');
 
                 setCommentInput(current => ({...current, [orderId]: ''}));
+
                 dispatch(fetchOrders({
                     page: currentPage,
                     sortBy,
                     sortOrder,
                     searchCriteria,
-                }));
+                })).then(() => {
+
+                    restoreScrollPosition(currentScrollPosition);
+                });
             })
             .catch((error) => {
                 console.error('Error adding comment:', error);
@@ -59,19 +68,30 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
     };
 
 
-    const handleDeleteComment = async (commentId: string, isPersisted: boolean, commentIndex: number) => {
-        if (isPersisted && token) {
-            try {
+    const handleDeleteComment = async (commentId: string, isPersisted: boolean) => {
+        if (!isPersisted) return;
 
-                await dispatch(deleteCommentFromOrder({ orderId: order._id, commentId, token })).unwrap();
+        const currentScrollPosition = window.scrollY;
 
+        dispatch(deleteCommentFromOrder({ orderId: order._id, commentId }))
+            .unwrap()
+            .then(() => {
                 console.log("Comment deleted successfully.");
-            } catch (error) {
+
+                dispatch(fetchOrders({
+                    page: currentPage,
+                    sortBy,
+                    sortOrder,
+                    searchCriteria,
+                })).then(() => {
+                    restoreScrollPosition(currentScrollPosition);
+                });
+            })
+            .catch((error) => {
                 console.error("Failed to delete comment:", error);
-            }
-        } else {
-        }
+            });
     };
+
     const handleEditClick = (orderId: string) => {
         setEditingOrderId(orderId);
     };
@@ -99,35 +119,41 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                                     className="delete"
                                     onMouseEnter={() => setHoveredCommentId(comment._id)}
                                     onMouseLeave={() => setHoveredCommentId(null)}
-                                    onClick={() => handleDeleteComment(comment._id, true, commentIndex)}
+                                    onClick={() => handleDeleteComment(comment._id, true)}
                                 />
                             </p>
                         </div>
                     ))}
 
                 </div>
-                <div className="comment-text-area">
-                    <textarea
-                        className="add-comment"
-                        placeholder="Add a comment"
-                        value={commentInput[order._id] || ''}
-                        onChange={(e) => updateComment(order._id, e.target.value)}
-                    />
-                    <button
-                        className="global-btn add-comment-btn"
-                        onClick={() => handleAddComment(order._id)}
-                    >
-                        Add
-                    </button>
+                {canEdit && (
+                    <div className="comment-text-area">
+            <textarea
+                className="add-comment"
+                placeholder="Add a comment"
+                value={commentInput[order._id] || ''}
+                onChange={(e) => updateComment(order._id, e.target.value)}
+            />
+                        <button
+                            className="global-btn add-comment-btn"
+                            onClick={() => handleAddComment(order._id)}
+                        >
+                            Add
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {canEdit && (
+                <div className="edit-btn" onClick={() => handleEditClick(order._id)}>
+                    <img src={edit} alt="edit"/>
                 </div>
-            </div>
-            <div className="edit-btn" onClick={() => handleEditClick(order._id)}>
-                <img src={edit} alt="edit"/>
-            </div>
+            )}
 
             {editingOrderId === order._id && (
                 <EditOrder
                     order={order}
+                    onClose={() => setEditingOrderId(null)}
                 />
             )}
         </div>

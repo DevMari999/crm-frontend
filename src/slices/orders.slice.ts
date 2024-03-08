@@ -1,16 +1,14 @@
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import {Order, PaginationResult} from '../types/order.types';
-import {RootState} from "../store/store";
 import {CourseTypeStatistics, MonthlyOrderStats, OrdersState} from "../types/orders.slice.types";
-
 
 const initialState: OrdersState = {
     data: [],
     isLoading: false,
     currentPage: 1,
     totalPages: 0,
-    sortBy: 'defaultField',
-    sortOrder: 'asc',
+    sortBy: 'created_at',
+    sortOrder: 'desc',
     searchCriteria: {},
     isRowExpanded: false,
     expandedRowId: null,
@@ -51,14 +49,14 @@ export const fetchOrders = createAsyncThunk(
 
 export const addCommentToOrder = createAsyncThunk(
     'orders/addCommentToOrder',
-    async ({ orderId, comment, managerId, token }: { orderId: string; comment: string; managerId: string; token: string }, { dispatch, rejectWithValue }) => {
+    async ({ orderId, comment, managerId }: { orderId: string; comment: string; managerId: string }, { rejectWithValue }) => {
         try {
             const response = await fetch(`http://localhost:8080/api/orders/${orderId}/comments`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
                 },
+                credentials: 'include',
                 body: JSON.stringify({ comment, managerId }),
             });
 
@@ -67,8 +65,6 @@ export const addCommentToOrder = createAsyncThunk(
             }
 
             const updatedOrderOrComment = await response.json();
-
-
             return updatedOrderOrComment;
         } catch (error: any) {
             return rejectWithValue(error.toString());
@@ -77,31 +73,22 @@ export const addCommentToOrder = createAsyncThunk(
 );
 
 
+
 export const deleteCommentFromOrder = createAsyncThunk(
     'orders/deleteCommentFromOrder',
-    async ({ orderId, commentId, token }: { orderId: string; commentId: string; token: string }, { dispatch, getState, rejectWithValue }) => {
+    async ({ orderId, commentId }: { orderId: string; commentId: string }, { rejectWithValue }) => {
         try {
             const response = await fetch(`http://localhost:8080/api/orders/${orderId}/comments/${commentId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
                 },
+                credentials: 'include',
             });
 
             if (!response.ok) {
                 throw new Error('Failed to delete the comment.');
             }
-
-            const state = getState() as RootState;
-            const { currentPage, sortBy, sortOrder, searchCriteria } = state.orders;
-
-            dispatch(fetchOrders({
-                page: currentPage,
-                sortBy,
-                sortOrder,
-                searchCriteria
-            }));
 
             return commentId;
         } catch (error: any) {
@@ -109,6 +96,7 @@ export const deleteCommentFromOrder = createAsyncThunk(
         }
     }
 );
+
 
 
 

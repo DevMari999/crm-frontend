@@ -1,91 +1,76 @@
-import React, {FormEvent, useState} from 'react';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import {  useSelector } from "react-redux";
+import { useNavigate } from 'react-router-dom';
 import "./Login.css";
-import {getUserDetailsFromToken} from '../../utils/tokenUtils';
+
+import { selectUserRole } from '../../slices/auth.slice';
+import {useDispatch} from "../../hooks/custom.hooks";
+import { fetchUserDetails } from '../../slices/auth.slice';
+interface LoginFormInputs {
+    email: string;
+    password: string;
+}
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
+    const [errorMessage, setErrorMessage] = React.useState('');
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
 
-        if (!email.includes('@')) {
-            setErrorMessage('Invalid email format');
-            return;
-        }
+    const userRole = useSelector(selectUserRole);
 
-        setErrorMessage('');
-
-        const requestData = JSON.stringify({email, password});
-        console.log('Sending request data:', requestData);
-
+    const onSubmit = async (data: LoginFormInputs) => {
+        const { email, password } = data;
         const loginUrl = 'http://localhost:8080/api/auth/login';
 
         try {
             const response = await fetch(loginUrl, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json',},
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: requestData,
+                body: JSON.stringify({ email, password }),
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('Login failed:', errorData.message || response.statusText);
                 setErrorMessage(errorData.message || 'Login failed. Please check your credentials.');
                 return;
             }
 
-            const data = await response.json();
-            console.log('Login successful:', data);
-            localStorage.setItem('token', data.token);
+            await dispatch(fetchUserDetails()).unwrap();
 
-            try {
-                const decoded = getUserDetailsFromToken();
-                console.log('Decoded token:', decoded);
-
-                if (decoded.userRole === 'admin') {
-                    window.location.href = '/admin';
-                } else {
-                    window.location.href = '/orders';
-                }
-            } catch (error) {
-                console.error('Error decoding token:', error);
-                setErrorMessage('An error occurred while decoding the token.');
-            }
         } catch (error) {
             console.error('Error during login:', error);
             setErrorMessage('An error occurred during login.');
         }
     };
 
+    useEffect(() => {
+        if (userRole === 'admin') {
+            navigate('/admin');
+        } else if (userRole === 'manager') {
+            navigate('/orders');
+        }
+    }, [userRole, navigate]);
+
 
     return (
         <div className="login">
             <div className="form-wrapper">
-                <form className="form" onSubmit={handleSubmit}>
+                <form className="form" onSubmit={handleSubmit(onSubmit)}>
                     <h2>Welcome</h2>
                     {errorMessage && <div className="error-message">{errorMessage}</div>}
                     <div className="form-field">
                         <label htmlFor="email">Email:</label>
-                        <input
-                            type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
+                        <input {...register("email", { required: "Email is required", pattern: { value: /^\S+@\S+$/i, message: "Invalid email format" } })} type="email" id="email" />
+                        {errors.email && <div className="error-message">{errors.email.message}</div>}
                     </div>
                     <div className="form-field">
                         <label htmlFor="password">Password:</label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
+                        <input {...register("password", { required: "Password is required" })} type="password" id="password" />
+                        {errors.password && <div className="error-message">{errors.password.message}</div>}
                     </div>
                     <button className="login-btn" type="submit">Login</button>
                 </form>

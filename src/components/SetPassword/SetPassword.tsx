@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+
+interface IFormInput {
+    password: string;
+    confirmPassword: string;
+}
 
 const SetPassword: React.FC = () => {
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
+    const { register, handleSubmit, watch, formState: { errors } } = useForm<IFormInput>();
     const navigate = useNavigate();
     const { token } = useParams<'token'>();
 
-    const handleSetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleSetPassword = async (data: IFormInput) => {
+        const { password, confirmPassword } = data;
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            console.error('Passwords do not match');
             return;
         }
 
@@ -35,39 +39,36 @@ const SetPassword: React.FC = () => {
             alert('Password set successfully. Your account is now active.');
             navigate('/login');
         } catch (error: any) {
-            setError(error.message);
+            console.error(error.message);
         }
     };
 
     return (
         <div className="login">
             <div className="form-wrapper">
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form className="form" onSubmit={handleSetPassword}>
-                <h2>Set New Password</h2>
-                <div className="form-field">
-                    <label htmlFor="password">New Password:</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-field">
-                    <label htmlFor="confirmPassword">Confirm New Password:</label>
-                    <input
-                        type="password"
-                        id="confirmPassword"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <button className="login-btn" type="submit">Set Password</button>
-            </form>
-                </div>
+                {errors.password && <p style={{ color: 'red' }}>Passwords must match and cannot be empty.</p>}
+                {errors.confirmPassword && <p style={{ color: 'red' }}>Passwords must match and cannot be empty.</p>}
+                <form className="form" onSubmit={handleSubmit(handleSetPassword)}>
+                    <h2>Set New Password</h2>
+                    <div className="form-field">
+                        <label htmlFor="password">New Password:</label>
+                        <input
+                            type="password"
+                            id="password"
+                            {...register("password", { required: true })}
+                        />
+                    </div>
+                    <div className="form-field">
+                        <label htmlFor="confirmPassword">Confirm New Password:</label>
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            {...register("confirmPassword", { validate: value => value === watch('password') || "The passwords do not match" })}
+                        />
+                    </div>
+                    <button className="login-btn" type="submit">Set Password</button>
+                </form>
+            </div>
         </div>
     );
 };

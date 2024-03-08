@@ -1,88 +1,26 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
+import {useSelector} from "react-redux";
+import {fetchOrders} from "../../slices/orders.slice";
+import {RootState} from "../../store/store";
+import {useForm} from "react-hook-form";
 import {Order} from "../../types/order.types";
 import './EditOrder.css';
 import {useDispatch} from "../../hooks/custom.hooks";
-import {fetchOrders} from "../../slices/orders.slice";
-import {useSelector} from "react-redux";
-import {RootState} from "../../store/store";
 
 interface EditOrderProps {
     order: Order;
+    onClose: () => void;
 }
 
-const EditOrder: React.FC<EditOrderProps> = ({order}) => {
-    const [editData, setEditData] = useState<Partial<Order>>({
-        name: order.name,
-        surname: order.surname,
-        email: order.email,
-        phone: order.phone,
-        age: order.age,
-        course: order.course,
-        course_format: order.course_format,
-        course_type: order.course_type,
-        sum: order.sum,
-        already_paid: order.already_paid,
-        status: order.status,
-        group: order.group,
-        manager: order.manager,
-        msg: order.msg,
-    });
-    const [isVisible, setIsVisible] = useState(true);
+const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
     const dispatch = useDispatch();
     const currentPage = useSelector((state: RootState) => state.orders.currentPage);
     const sortBy = useSelector((state: RootState) => state.orders.sortBy);
     const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
     const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
-        const target = e.target;
-        const value = target.type === 'checkbox' ? (target as HTMLInputElement).checked : target.value;
-        setEditData(prev => ({
-            ...prev,
-            [target.name]: value
-        }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-            console.error("No token found");
-            return;
-        }
-
-        try {
-            const response = await fetch(`http://localhost:8080/api/orders/${order._id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify(editData),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update the order.');
-            }
-
-            const updatedOrder = await response.json();
-            console.log('Order updated successfully:', updatedOrder);
-
-            dispatch(fetchOrders({
-                page: currentPage,
-                sortBy,
-                sortOrder,
-                searchCriteria,
-            }));
-
-            setIsVisible(false);
-        } catch (error) {
-            console.error('Error updating order:', error);
-        }
-    };
-    const handleCancelEdit = () => {
-        setIsVisible(false);
-    };
+    const {register, handleSubmit, reset, formState: {errors}} = useForm<Partial<Order>>({
+        defaultValues: order
+    });
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -91,74 +29,92 @@ const EditOrder: React.FC<EditOrderProps> = ({order}) => {
         };
     }, []);
 
-    if (!isVisible) return null;
+    const onSubmit = async (data: Partial<Order>) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/orders/${order._id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update the order.');
+            }
+
+            const updatedOrder = await response.json();
+            console.log('Order updated successfully:', updatedOrder);
+            dispatch(fetchOrders({
+                page: currentPage,
+                sortBy,
+                sortOrder,
+                searchCriteria,
+            })).then(() => {
+                window.scrollTo(0, window.scrollY);
+                onClose();
+            });
+        } catch (error) {
+            console.error('Error updating order:', error);
+        }
+    };
 
     return (
         <div className="edit-order global-modal">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <label>
                     Name:
-                    <input name="name" type="text" value={editData.name || ''} onChange={handleChange}/>
+                    <input {...register("name")} type="text"/>
                 </label>
 
                 <label>
                     Lastname:
-                    <input name="surname" type="text" value={editData.surname || ''} onChange={handleChange}/>
+                    <input {...register("surname")} type="text"/>
                 </label>
 
                 <label>
                     Age:
-                    <input name="age" type="number" value={editData.age || ''} onChange={handleChange}/>
+                    <input {...register("age", {valueAsNumber: true})} type="number"/>
                 </label>
 
                 <label>
                     Already Paid:
-                    <select
-                        name="already_paid"
-                        value={editData.already_paid?.toString() || ''}
-                        onChange={handleChange}
-                    >
+                    <select {...register("already_paid")}>
                         <option value="">Select</option>
                         <option value="true">Yes</option>
                         <option value="false">No</option>
                     </select>
                 </label>
 
-
                 <label>
                     Email:
-                    <input name="email" type="email" value={editData.email || ''} onChange={handleChange}/>
+                    <input {...register("email")} type="email"/>
                 </label>
 
                 <label>
                     Phone:
-                    <input name="phone" type="text" value={editData.phone || ''} onChange={handleChange}/>
+                    <input {...register("phone")} type="text"/>
                 </label>
 
                 <label>
                     Status:
-                    <select name="status" value={editData.status || 'select'} onChange={handleChange}>
+                    <select {...register("status")}>
                         <option value="">Select</option>
                         {['pending', 'completed', 'cancelled', 'in work', 'dubbing'].map((statusOption) => (
-                            <option key={statusOption} value={statusOption}>
-                                {statusOption}
-                            </option>
+                            <option key={statusOption} value={statusOption}>{statusOption}</option>
                         ))}
                     </select>
                 </label>
 
                 <label>
                     Sum:
-                    <input name="sum" type="number" value={editData.sum || ''} onChange={handleChange}/>
+                    <input {...register("sum", {valueAsNumber: true})} type="number"/>
                 </label>
 
                 <label>
                     Course:
-                    <select
-                        name="course_type"
-                        value={editData.course_type || ''}
-                        onChange={handleChange}
-                    >
+                    <select {...register("course")}>
                         <option value="">Select</option>
                         {['QACX', 'PCX', 'JSCX', 'JCX', 'FS', 'FE'].map((type) => (
                             <option key={type} value={type}>{type}</option>
@@ -168,21 +124,25 @@ const EditOrder: React.FC<EditOrderProps> = ({order}) => {
 
                 <label>
                     Course format:
-                    <input name="course_format" type="text" value={editData.course_format || ''}
-                           onChange={handleChange}/>
+                    <select {...register("course_format")}  >
+                        <option value="">Select</option>
+                        <option value="online">online</option>
+                        <option value="static">static</option>
+                    </select>
                 </label>
 
                 <label>
                     Course type:
-                    <input name="course_type" type="text" value={editData.course_type || ''} onChange={handleChange}/>
+                    <input {...register("course_type")} type="text"/>
                 </label>
 
                 <label>
                     Group:
-                    <input name="group" type="text" value={editData.group || ''} onChange={handleChange}/>
+                    <input {...register("group")} type="text"/>
                 </label>
                 <button type="submit">Save</button>
-                <button type="button" onClick={handleCancelEdit}>Cancel</button>
+                <button type="button" onClick={onClose}>Cancel</button>
+
             </form>
         </div>
     );

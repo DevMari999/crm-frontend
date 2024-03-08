@@ -17,12 +17,23 @@ const initialState: UsersState = {
 
 export const fetchManagers = createAsyncThunk(
     'users/fetchManagers',
-    async ({ page, limit }: { page: number; limit: number }, { rejectWithValue }) => {
+    async ({ page, limit, sortBy = 'created_at', sortOrder = 'desc' }: { page: number; limit: number; sortBy?: string; sortOrder?: 'asc' | 'desc' }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/users/managers?page=${page}&limit=${limit}`);
+            const queryParams = new URLSearchParams({
+                page: page.toString(),
+                limit: limit.toString(),
+                sortBy,
+                sortOrder,
+            }).toString();
+
+            const response = await fetch(`http://localhost:8080/api/users/managers?${queryParams}`, {
+                credentials: 'include',
+            });
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+
             return await response.json();
         } catch (error: any) {
             return rejectWithValue(error.message);
@@ -35,12 +46,20 @@ export const addManager = createAsyncThunk(
     'users/addManager',
     async (managerData: { name: string; lastname: string; email: string }, { dispatch, rejectWithValue }) => {
         try {
+            const currentDate = new Date();
+
+
+            const requestData = {
+                ...managerData,
+                created_at: currentDate
+            };
+
             const response = await fetch('http://localhost:8080/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(managerData),
+                body: JSON.stringify(requestData),
             });
 
             if (!response.ok) {
@@ -57,6 +76,7 @@ export const addManager = createAsyncThunk(
         }
     }
 );
+
 export const setCurrentUser = createAsyncThunk(
     'users/setCurrentUser',
     async (userId: string, { rejectWithValue }) => {

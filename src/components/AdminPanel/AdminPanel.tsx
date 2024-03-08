@@ -1,35 +1,30 @@
-import React, {useState} from 'react';
+import React from 'react';
 import Managers from "../Managers/Managers";
 import "./AdminPanel.css";
 import StatusStatistics from "../StatusStatistics/StatusStatistics";
 import DatesStatistics from "../DatesStatistics/DatesStatistics";
 import CoursesStatistics from "../CoursesStatistics/CoursesStatistics";
-import {useDispatch} from "../../hooks/custom.hooks";
-import {addManager} from "../../slices/user.slice";
+import { useForm } from 'react-hook-form';
+import { useDispatch } from "../../hooks/custom.hooks";
+import { addManager } from "../../slices/user.slice";
+
 const AdminPanel: React.FC = () => {
-    const [name, setName] = useState('');
-    const [lastname, setLastname] = useState('');
-    const [email, setEmail] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<{
+        name: string;
+        lastname: string;
+        email: string;
+    }>();
+    const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
     const dispatch = useDispatch();
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
 
-        const managerData = {
-            name,
-            lastname,
-            email,
-        };
-
-        dispatch(addManager(managerData))
+    const onSubmit = async (data: { name: string; lastname: string; email: string; }) => {
+        dispatch(addManager(data))
             .unwrap()
             .then(responseData => {
                 console.log(responseData);
                 setIsModalOpen(false);
-                setName('');
-                setLastname('');
-                setEmail('');
+                reset();
                 setError(null);
             })
             .catch(error => {
@@ -41,50 +36,38 @@ const AdminPanel: React.FC = () => {
     return (
         <div className="admin-panel-wrapper">
             <div className="all-stats-wrapper">
-                <CoursesStatistics/>
+                <CoursesStatistics />
                 <StatusStatistics />
-                <DatesStatistics/>
+                <DatesStatistics />
             </div>
             <button className="global-btn manager-btn" onClick={() => setIsModalOpen(true)}>CREATE NEW MANAGER</button>
             {isModalOpen && (
                 <div className="global-modal manager-modal">
                     <div className="modal-content">
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit(onSubmit)}>
                             <div>
                                 <label>Name:</label>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    required
-                                />
+                                <input {...register("name", { required: "Name is required" })} type="text" />
+                                {errors.name && <p style={{ color: 'red' }}>{errors.name.message}</p>}
                             </div>
                             <div>
                                 <label>Last Name:</label>
-                                <input
-                                    type="text"
-                                    value={lastname}
-                                    onChange={(e) => setLastname(e.target.value)}
-                                />
+                                <input {...register("lastname", { required: "Last name is required" })} type="text" />
+                                {errors.lastname && <p style={{ color: 'red' }}>{errors.lastname.message}</p>}
                             </div>
                             <div>
                                 <label>Email:</label>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
+                                <input {...register("email", { required: "Email is required", pattern: /^\S+@\S+$/i })} type="email" />
+                                {errors.email && <p style={{ color: 'red' }}>{errors.email.message}</p>}
                             </div>
+                            {error && <div style={{color: 'red'}}>{error}</div>}
                             <button type="submit">Submit</button>
                             <button type="button" onClick={() => setIsModalOpen(false)}>Cancel</button>
                         </form>
-                        {error && <div style={{color: 'red'}}>{error}</div>}
                     </div>
                 </div>
             )}
-
-            <Managers/>
+            <Managers />
         </div>
     );
 };
