@@ -56,16 +56,31 @@ const OrdersTable = () => {
     }, [orders]);
 
     useEffect(() => {
-        const queryParams = new URLSearchParams(location.search);
-        const pageFromUrl = parseInt(queryParams.get('page') || '1');
-        dispatch(setCurrentPage(pageFromUrl));
+        const queryParams = new URLSearchParams();
+
+        queryParams.set('page', currentPage.toString());
+        queryParams.set('sortBy', sortBy);
+        queryParams.set('sortOrder', sortOrder);
+
+        Object.entries(searchCriteria).forEach(([key, value]) => {
+            if (value) {
+                queryParams.set(key, value.toString());
+            }
+        });
+
+        navigate({
+            pathname: location.pathname,
+            search: `?${queryParams.toString()}`,
+        }, { replace: true });
+
         dispatch(fetchOrders({
-            page: pageFromUrl,
+            page: currentPage,
             sortBy,
             sortOrder,
-            searchCriteria
+            searchCriteria,
         }));
-    }, [dispatch, location.search, sortBy, sortOrder, searchCriteria]);
+    }, [currentPage, sortBy, sortOrder, searchCriteria, navigate, dispatch]);
+
 
     const updatePageInUrl = (newPage: number) => {
         navigate(`/orders?page=${newPage}`, {replace: true});

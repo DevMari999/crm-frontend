@@ -61,7 +61,7 @@ export const StatusStatistics: React.FC = () => {
                 labels.push(label);
                 data.push(count);
                 if (label === 'Unknown' || label === null) {
-                    backgroundColors.push('#631315');
+                    backgroundColors.push('#5e1213');
                 } else {
                     backgroundColors.push(labelColorMap[label] || getRandomColor(label));
                 }
@@ -117,7 +117,7 @@ export const StatusStatistics: React.FC = () => {
     };
 
     return (
-        <div style={{ width: '330px', height: '300px' }}>
+        <div style={{ width: '330px', height: '240px' }}>
             <Doughnut data={chartData} options={options} />
         </div>
     );

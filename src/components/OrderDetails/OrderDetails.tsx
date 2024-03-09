@@ -2,11 +2,8 @@ import React, { useState} from 'react';
 import {CommentInput, Order} from "../../types/order.types";
 import EditOrder from "../EditOrder/EditOrder";
 import './OrderDetails.css';
-// @ts-ignore
 import edit from "../../assets/edit.png";
-// @ts-ignore
 import dlt from "../../assets/delete2.png";
-// @ts-ignore
 import dltHover from "../../assets/delete-hover.png";
 import {useDispatch} from "../../hooks/custom.hooks";
 import {addCommentToOrder, deleteCommentFromOrder, fetchOrders} from "../../slices/orders.slice";
@@ -113,14 +110,16 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
-                                <img
-                                    src={hoveredCommentId === comment._id ? dltHover : dlt}
-                                    alt="delete"
-                                    className="delete"
-                                    onMouseEnter={() => setHoveredCommentId(comment._id)}
-                                    onMouseLeave={() => setHoveredCommentId(null)}
-                                    onClick={() => handleDeleteComment(comment._id, true)}
-                                />
+                                {canEdit && (
+                                    <img
+                                        src={hoveredCommentId === comment._id ? dltHover : dlt}
+                                        alt="delete"
+                                        className="delete"
+                                        onMouseEnter={() => setHoveredCommentId(comment._id)}
+                                        onMouseLeave={() => setHoveredCommentId(null)}
+                                        onClick={() => handleDeleteComment(comment._id, true)}
+                                    />
+                                )}
                             </p>
                         </div>
                     ))}

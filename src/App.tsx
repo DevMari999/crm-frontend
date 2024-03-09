@@ -40,7 +40,7 @@ const App = () => {
     }, [dispatch]);
 
     if (authInitializing) {
-        return <div>Loading...</div>;
+        return <div></div>;
     }
 
     return (

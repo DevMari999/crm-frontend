@@ -7,14 +7,14 @@
 
 .each-manager {
     height: 150px;
-    margin: 20px 50px;
+    margin: 20px 30px;
     font-size: 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 30px !important;
-    border: #d1d1d1 0.03em solid;
-    box-shadow: 1px 2px 3px rgba(203, 203, 203, 0.8);
+    border: #e3e3e3 0.03em solid;
+    box-shadow: 1px 2px 3px rgba(214, 214, 214, 0.8);
 }
 
 .managers-btn {
@@ -25,4 +25,17 @@
 
 .manager-ul li {
     list-style-type: none;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.delete-managers {
+    background: linear-gradient(145deg, rgba(113, 15, 15, 0.98) 0%, rgba(163, 49, 49, 0.98) 100%) !important;
+    border: 1px solid #8f1919 !important;
+}
+
+.delete-managers:hover {
+    background: linear-gradient(145deg, rgba(128, 26, 26, 0.98) 0%, rgba(160, 63, 63, 0.98) 100%) !important;
 }

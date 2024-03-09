@@ -19,6 +19,7 @@
     padding: 100px;
     box-shadow: 2px 3px 5px rgba(161, 161, 161, 0.62);
     border-radius: 5px;
+    min-width: 400px;
 }
 
 .form {
@@ -39,8 +40,12 @@
     padding: 0 5px;
     height: 25px;
     background: none;
+    min-width: 220px;
 }
-
+.form-field input:focus {
+    outline: none;
+    border-bottom: solid #0a0a0a 1px;
+}
 .form-field label {
     font-size: 13px;
     font-weight: bolder;

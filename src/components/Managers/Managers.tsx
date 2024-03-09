@@ -1,16 +1,17 @@
-import React, {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
     fetchManagers,
     generateActivationLinkForManager,
     banManager,
     unbanManager,
-    deleteManager, // Make sure these are imported from your slice
+    deleteManager,
 } from '../../slices/user.slice';
-import {RootState} from '../../store/store';
+import { RootState } from '../../store/store';
 import Pagination from '../Pagination/Pagination';
 import './Managers.css';
-import {useDispatch} from "../../hooks/custom.hooks";
+import { useDispatch } from "../../hooks/custom.hooks";
+import CustomModal from '../CustomModal/CustomModal';
 
 const Managers: React.FC = () => {
     const dispatch = useDispatch();
@@ -19,13 +20,78 @@ const Managers: React.FC = () => {
     const pagination = useSelector((state: RootState) => state.users.pagination);
     const [currentPage, setCurrentPage] = useState(pagination.currentPage);
     const limit = 3;
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [action, setAction] = useState('');
+    const [userIdToDelete, setUserIdToDelete] = useState('');
 
     useEffect(() => {
-        dispatch(fetchManagers({page: currentPage, limit}));
+        dispatch(fetchManagers({ page: currentPage, limit }));
     }, [dispatch, currentPage, limit]);
 
     const updatePage = (newPage: number) => {
         setCurrentPage(newPage);
+    };
+    useEffect(() => {
+        const body = document.querySelector('body');
+        if (isModalOpen) {
+            body?.classList.add('modal-open');
+        } else {
+            body?.classList.remove('modal-open');
+        }
+    }, [isModalOpen]);
+    const handleOpenModal = (action: string, userId?: string) => {
+        setAction(action);
+        if (userId) setUserIdToDelete(userId);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
+    const handleConfirmAction = () => {
+        handleCloseModal();
+        switch (action) {
+            case 'ban':
+                dispatch(banManager(userIdToDelete))
+                    .unwrap()
+                    .then(() => {
+                        dispatch(fetchManagers({ page: currentPage, limit }));
+                    })
+                    .catch(() => {
+                        alert('Failed to ban manager.');
+                    });
+                break;
+            case 'unban':
+                dispatch(unbanManager(userIdToDelete))
+                    .unwrap()
+                    .then(() => {
+                        dispatch(fetchManagers({ page: currentPage, limit }));
+                    })
+                    .catch(() => {
+                        alert('Failed to unban manager.');
+                    });
+                break;
+            case 'delete':
+                dispatch(deleteManager(userIdToDelete))
+                    .unwrap()
+                    .then(() => {
+
+                        const isLastManagerOnPage = managers.length === 1;
+                        let newCurrentPage = currentPage;
+                        if (isLastManagerOnPage && currentPage > 1) {
+                            newCurrentPage = currentPage - 1;
+                        }
+                        setCurrentPage(newCurrentPage);
+                        dispatch(fetchManagers({ page: newCurrentPage, limit }));
+                    })
+                    .catch(() => {
+                        alert('Failed to delete manager.');
+                    });
+                break;
+            default:
+                break;
+        }
     };
 
     const handleActivateManager = (userId: string) => {
@@ -43,57 +109,6 @@ const Managers: React.FC = () => {
                 alert(errorMessage);
             });
     };
-
-    const handleBanUnbanManager = (userId: string, shouldBan: boolean) => {
-        if (shouldBan) {
-            dispatch(banManager(userId))
-                .unwrap()
-                .then(() => {
-                    alert('Manager banned successfully.');
-                    dispatch(fetchManagers({page: currentPage, limit}));
-                })
-                .catch((error: unknown) => {
-                    alert('Failed to ban manager.');
-                });
-        } else {
-            dispatch(unbanManager(userId))
-                .unwrap()
-                .then(() => {
-                    alert('Manager unbanned successfully.');
-                    dispatch(fetchManagers({page: currentPage, limit}));
-                })
-                .catch((error: unknown) => {
-                    alert('Failed to unban manager.');
-                });
-        }
-    };
-
-    const handleDeleteManager = (userId: string) => {
-        dispatch(deleteManager(userId))
-            .unwrap()
-            .then(() => {
-                alert('Manager deleted successfully.');
-
-                const isLastManagerOnPage = managers.length === 1;
-
-                let newCurrentPage = currentPage;
-                if (isLastManagerOnPage && currentPage > 1) {
-                    newCurrentPage = currentPage - 1;
-                }
-
-                setCurrentPage(newCurrentPage);
-
-                dispatch(fetchManagers({page: newCurrentPage, limit}));
-            })
-            .catch((error: unknown) => {
-                let errorMessage = 'Failed to delete manager.';
-                if (error instanceof Error) {
-                    errorMessage = error.message;
-                }
-                alert(errorMessage);
-            });
-    };
-
 
     return (
         <div>
@@ -113,10 +128,10 @@ const Managers: React.FC = () => {
                                     <div>
                                         {manager.banned ? (
                                             <button className="global-btn managers-btn"
-                                                    onClick={() => handleBanUnbanManager(manager._id, false)}>UNBAN</button>
+                                                    onClick={() => handleOpenModal('unban', manager._id)}>UNBAN</button>
                                         ) : (
                                             <button className="global-btn managers-btn"
-                                                    onClick={() => handleBanUnbanManager(manager._id, true)}>BAN</button>
+                                                    onClick={() => handleOpenModal('ban', manager._id)}>BAN</button>
                                         )}
 
                                         <button
@@ -126,8 +141,8 @@ const Managers: React.FC = () => {
                                             {manager.password ? 'RESET PASSWORD' : 'ACTIVATE'}
                                         </button>
 
-                                        <button className="global-btn managers-btn"
-                                                onClick={() => handleDeleteManager(manager._id)}>DELETE
+                                        <button className="global-btn managers-btn delete-managers"
+                                                onClick={() => handleOpenModal('delete', manager._id)}>DELETE
                                         </button>
                                     </div>
                                 </div>
@@ -143,6 +158,13 @@ const Managers: React.FC = () => {
                             updatePageInUrl={updatePage}
                         />
                     </div>
+                    {isModalOpen && (
+                        <CustomModal
+                            message={`Are you sure you want to ${action} this manager?`}
+                            onConfirm={handleConfirmAction}
+                            onCancel={handleCloseModal}
+                        />
+                    )}
                 </>
             )}
         </div>

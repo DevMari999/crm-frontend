@@ -1,6 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
 import Chart from 'chart.js/auto';
-import "./CoursesStatistics.css"
 
 const CoursesStatistics: React.FC = () => {
     const [courseData, setCourseData] = useState<{ courseType: string; count: number }[]>([]);

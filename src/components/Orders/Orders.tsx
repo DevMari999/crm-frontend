@@ -40,6 +40,8 @@ const Orders = () => {
     const currentUserId = useSelector(selectUserId);
     const [isRotated, setIsRotated] = useState(false);
     const [showMyOrders, setShowMyOrders] = useState(false);
+    const [animateDownload, setAnimateDownload] = useState(false);
+
     const handleMyOrdersChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const isChecked = e.target.checked;
         setShowMyOrders(isChecked);
@@ -114,7 +116,9 @@ const Orders = () => {
         debouncedSearchPhone, debouncedSearchAge, debouncedSearchCourse,
         debouncedSearchFormat, debouncedSearchType, debouncedSearchStatus, debouncedSearchGroup,
         debouncedSearchStartDate, debouncedSearchEndDate, showMyOrders, dispatch]);
+
     const downloadExcel = async () => {
+        setAnimateDownload(true);
         dispatch(fetchAllOrdersForExcel())
             .unwrap()
             .then((ordersArray) => {
@@ -141,122 +145,65 @@ const Orders = () => {
             .catch((error) => {
                 console.error('Error downloading Excel file:', error);
             });
+        setTimeout(() => setAnimateDownload(false), 500);
     };
-
 
     return (
         <div className="orders">
             <div className="search-fields-wrapper">
                 <div className="search-fields">
+                    {[
+                        { label: "Name", value: searchName, onChange: setSearchName },
+                        { label: "Surname", value: searchSurname, onChange: setSearchSurname },
+                        { label: "Email", value: searchEmail, onChange: setSearchEmail },
+                        { label: "Phone", value: searchPhone, onChange: setSearchPhone },
+                        { label: "Age", value: searchAge, onChange: setSearchAge }
+                    ].map((field, index) => (
+                        <div className="search-field" key={index}>
+                            <input type="text" placeholder={field.label} value={field.value} onChange={(e) => field.onChange(e.target.value)} />
+                        </div>
+                    ))}
+                    {[
+                        { label: "Course", state: searchCourse, setState: setSearchCourse, options: ["", "QACX", "PCX", "JSCX", "JCX", "FS", "FE"] },
+                        { label: "Format", state: searchFormat, setState: setSearchFormat, options: ["", "static", "online"] },
+                        { label: "Type", state: searchType, setState: setSearchType, options: ["", "pro", "minimal", "vip", "incubator"] },
+                        { label: "Status", state: searchStatus, setState: setSearchStatus, options: ["", "cancelled", "completed", "dubbing", "in work", "pending"] },
+                        { label: "Group", value: searchGroup, onChange: setSearchGroup }
+                    ].map((field, index) => (
+                        <div className="search-field" key={index}>
+                            {field.options ? (
+                                <select className="custom-select" value={field.state} onChange={(e) => field.setState(e.target.value)}>
+                                    {field.options.map((option, index) => (
+                                        <option key={index} value={option}>{option || field.label}</option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <input type="text" placeholder={field.label} value={field.value} onChange={(e) => field.onChange(e.target.value)} />
+                            )}
+                        </div>
+                    ))}
                     <div className="search-field">
-                        <input type="text" placeholder="Name" value={searchName}
-                               onChange={(e) => setSearchName(e.target.value)}/>
+                        <input type="date"  value={searchStartDate} onChange={(e) => setSearchStartDate(e.target.value)} />
                     </div>
                     <div className="search-field">
-                        <input type="text" placeholder="Surname" value={searchSurname}
-                               onChange={(e) => setSearchSurname(e.target.value)}/>
-                    </div>
-                    <div className="search-field">
-                        <input type="text" placeholder="Email" value={searchEmail}
-                               onChange={(e) => setSearchEmail(e.target.value)}/>
-                    </div>
-                    <div className="search-field">
-                        <input type="text" placeholder="Phone" value={searchPhone}
-                               onChange={(e) => setSearchPhone(e.target.value)}/>
-                    </div>
-                    <div className="search-field">
-                        <input type="text" placeholder="Age" value={searchAge}
-                               onChange={(e) => setSearchAge(e.target.value)}/>
-                    </div>
-                    <div className="search-field">
-                        <select
-                            value={searchCourse}
-                            onChange={(e) => setSearchCourse(e.target.value)}
-                        >
-                            <option value="">Course</option>
-                            <option value="QACX">QACX</option>
-                            <option value="PCX">PCX</option>
-                            <option value="JSCX">JSCX</option>
-                            <option value="JCX">JCX</option>
-                            <option value="FS">FS</option>
-                            <option value="FE">FE</option>
-                        </select>
-                    </div>
-
-                    <div className="search-field">
-                        <select
-                            value={searchCourse}
-                            onChange={(e) => setSearchFormat(e.target.value)}
-                        >
-                            <option value="">Format</option>
-                            <option value="static">static</option>
-                            <option value="online">online</option>
-
-                        </select>
-                    </div>
-                    <div className="search-field">
-                        <select
-                            value={searchCourse}
-                            onChange={(e) => setSearchType(e.target.value)}
-                        >
-                            <option value="">Type</option>
-                            <option value="pro">pro</option>
-                            <option value="minimal">minimal</option>
-                            <option value="vip">vip</option>
-                            <option value="incubator">incubator</option>
-                        </select>
-                    </div>
-                    <div className="search-field">
-                        <select
-                            value={searchCourse}
-                            onChange={(e) => setSearchStatus(e.target.value)}
-                        >
-                            <option value="">Status</option>
-                            <option value="cancelled">cancelled</option>
-                            <option value="completed">completed</option>
-                            <option value="dubbing">dubbing</option>
-                            <option value="in work">in work</option>
-                            <option value="pending">pending</option>
-                        </select>
-                    </div>
-                    <div className="search-field">
-                        <input type="text" placeholder="Group" value={searchGroup}
-                               onChange={(e) => setSearchGroup(e.target.value)}/>
-                    </div>
-                    <div className="search-field">
-                        <input
-                            type="date"
-                            placeholder="Start date"
-                            value={searchStartDate}
-                            onChange={(e) => setSearchStartDate(e.target.value)}
-                        />
-                    </div>
-                    <div className="search-field">
-                        <input
-                            type="date"
-                            placeholder="End date"
-                            value={searchEndDate}
-                            onChange={(e) => setSearchEndDate(e.target.value)}
-                        />
+                        <input type="date"  value={searchEndDate} onChange={(e) => setSearchEndDate(e.target.value)} />
                     </div>
                 </div>
                 <div className="extra-filter">
-                    <>
-                        <input type="checkbox" id="my-orders" checked={showMyOrders} onChange={handleMyOrdersChange}/>
-                        <label htmlFor="my-orders">My</label>
-                    </>
+                    <input type="checkbox" id="my-orders" checked={showMyOrders} onChange={handleMyOrdersChange} />
+                    <label htmlFor="my-orders">My</label>
                     <div className="reset" onClick={handleRotate}>
-                        <img src={reset} alt="reset" className={isRotated ? "rotateBack" : "rotate"}
-                             onAnimationEnd={() => setIsRotated(false)}/>
+                        <img src={reset} alt="reset" className={isRotated ? "rotateBack" : "rotate"} onAnimationEnd={() => setIsRotated(false)} />
                     </div>
                     <div className="exel" onClick={downloadExcel}>
-                        <img src={exel} alt="exel"/>
+                        <img src={exel} alt="exel" className={animateDownload ? 'jump' : ''} />
                     </div>
                 </div>
             </div>
-            <OrdersTable/>
+            <OrdersTable />
         </div>
     );
+
 };
 
 export default Orders;

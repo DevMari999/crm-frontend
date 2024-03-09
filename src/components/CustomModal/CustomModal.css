@@ -1,0 +1,40 @@
+.custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-modal {
+    background-color: #fff;
+    border-radius: 9px;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.custom-modal-content {
+    text-align: center;
+}
+
+.custom-modal p {
+    margin-bottom: 20px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.custom-modal button {
+margin: 10px;
+    padding: 10px;
+}
+
+.custom-modal button:hover {
+}
+

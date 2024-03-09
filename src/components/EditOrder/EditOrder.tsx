@@ -4,7 +4,6 @@ import {fetchOrders} from "../../slices/orders.slice";
 import {RootState} from "../../store/store";
 import {useForm} from "react-hook-form";
 import {Order} from "../../types/order.types";
-import './EditOrder.css';
 import {useDispatch} from "../../hooks/custom.hooks";
 
 interface EditOrderProps {
@@ -133,15 +132,22 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
 
                 <label>
                     Course type:
-                    <input {...register("course_type")} type="text"/>
+                    <select {...register("course_type")}  >
+                        <option value="">Select</option>
+                        <option value="vip">vip</option>
+                        <option value="premium">premium</option>
+                        <option value="minimal">minimal</option>
+                        <option value="pro">pro</option>
+                        <option value="incubator">incubator</option>
+                    </select>
                 </label>
 
                 <label>
                     Group:
                     <input {...register("group")} type="text"/>
                 </label>
-                <button type="submit">Save</button>
-                <button type="button" onClick={onClose}>Cancel</button>
+                <button className="modal-btn-submit" >Save</button>
+                <button className="modal-btn-cancel" onClick={onClose}>Cancel</button>
 
             </form>
         </div>
