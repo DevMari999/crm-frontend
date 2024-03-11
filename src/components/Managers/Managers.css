@@ -6,7 +6,7 @@
 }
 
 .each-manager {
-    height: 150px;
+    height: 170px;
     margin: 20px 30px;
     font-size: 16px;
     display: flex;
@@ -17,12 +17,20 @@
     box-shadow: 1px 2px 3px rgba(214, 214, 214, 0.8);
 }
 
+
+.manager-all-btn {
+    width: 500px;
+    display: flex;
+    justify-content: flex-end;
+}
 .managers-btn {
     font-size: 13px;
     margin: 5px;
     padding: 0 13px;
 }
-
+.manager-ul {
+    width: 400px;
+}
 .manager-ul li {
     list-style-type: none;
 }
@@ -31,6 +39,37 @@ body.modal-open {
     overflow: hidden;
 }
 
+.orders-manager {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: 220px;
+}
+
+.orders-manager li {
+    list-style: none;
+
+}
+.manager-table {
+    box-shadow:none;
+    background-color: transparent;
+    overflow: hidden;
+
+.manager-table tbody{
+    box-shadow: 1px 2px 4px #dddddd;
+}
+}
+.manager-table td {
+    height: 22px ;
+    box-shadow: none;
+
+}
+.manager-table tr {
+
+}
+.manager-table tbody tr:hover {
+    background-color: transparent;
+}
 .delete-managers {
     background: linear-gradient(145deg, rgba(113, 15, 15, 0.98) 0%, rgba(163, 49, 49, 0.98) 100%) !important;
     border: 1px solid #8f1919 !important;
@@ -39,3 +78,5 @@ body.modal-open {
 .delete-managers:hover {
     background: linear-gradient(145deg, rgba(128, 26, 26, 0.98) 0%, rgba(160, 63, 63, 0.98) 100%) !important;
 }
+
+

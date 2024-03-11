@@ -4,9 +4,8 @@ import {  useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
 import "./Login.css";
 
-import { selectUserRole } from '../../slices/auth.slice';
-import {useDispatch} from "../../hooks/custom.hooks";
-import { fetchUserDetails } from '../../slices/auth.slice';
+import { selectUserRole, fetchUserDetails } from '../../slices';
+import {useDispatch} from "../../hooks";
 interface LoginFormInputs {
     email: string;
     password: string;

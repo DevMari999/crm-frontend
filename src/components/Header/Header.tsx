@@ -5,8 +5,8 @@ import home from "../../assets/home.png";
 import logOut from "../../assets/logOut.png";
 import admin from "../../assets/admin.png";
 import { useSelector } from 'react-redux';
-import {fetchUserDetails, selectUserRole} from '../../slices/auth.slice';
-import {useDispatch} from "../../hooks/custom.hooks";
+import {fetchUserDetails, selectUserRole} from '../../slices';
+import {useDispatch} from "../../hooks";
 
 const Header = () => {
     const navigate = useNavigate();

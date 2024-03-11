@@ -3,9 +3,9 @@ import { useSelector } from 'react-redux';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { RootState } from '../../store/store';
-import { fetchOrdersGroupedByMonth } from '../../slices/orders.slice';
+import { fetchOrdersGroupedByMonth } from '../../slices';
 import './DatesStatistics.css'
-import {useDispatch} from "../../hooks/custom.hooks";
+import {useDispatch} from "../../hooks";
 Chart.register(...registerables);
 
 const DatesStatistics: React.FC = () => {

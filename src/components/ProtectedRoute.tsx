@@ -1,14 +1,14 @@
 import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectUserRole, selectAuthStatus } from '../slices/auth.slice';
+import { selectUserRole, selectAuthStatus } from '../slices';
 
 interface ProtectedRouteProps {
     children: ReactNode;
     allowedRoles?: string[];
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
     const location = useLocation();
     const userRole = useSelector(selectUserRole);
     const authStatus = useSelector(selectAuthStatus);
@@ -31,3 +31,5 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
 
     return <>{children}</>;
 };
+
+export default ProtectedRoute;

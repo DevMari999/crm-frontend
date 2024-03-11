@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { fetchStatusStatistics } from '../../slices/orders.slice';
-import { Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import {useDispatch} from "../../hooks/custom.hooks";
+import React, {useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {fetchStatusStatistics} from '../../slices';
+import {Doughnut} from 'react-chartjs-2';
+import {Chart as ChartJS, ArcElement, Tooltip, Legend} from 'chart.js';
+import {useDispatch} from "../../hooks";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -48,6 +48,7 @@ export const StatusStatistics: React.FC = () => {
                 'completed': '#2d572f',
                 'cancelled': 'rgba(64,185,172,0.8)',
                 'dubbing': '#f4d15d',
+                'new': '#6d1516',
             };
 
             const labels: string[] = [];
@@ -60,11 +61,8 @@ export const StatusStatistics: React.FC = () => {
 
                 labels.push(label);
                 data.push(count);
-                if (label === 'Unknown' || label === null) {
-                    backgroundColors.push('#5e1213');
-                } else {
-                    backgroundColors.push(labelColorMap[label] || getRandomColor(label));
-                }
+
+                backgroundColors.push(labelColorMap[label] || getRandomColor(label));
             });
 
             setChartData({
@@ -117,8 +115,8 @@ export const StatusStatistics: React.FC = () => {
     };
 
     return (
-        <div style={{ width: '330px', height: '240px' }}>
-            <Doughnut data={chartData} options={options} />
+        <div style={{width: '330px', height: '240px'}}>
+            <Doughnut data={chartData} options={options}/>
         </div>
     );
 };

@@ -1,17 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import { Routes, Route } from "react-router-dom";
-import Login from "./components/Login/Login";
-import Orders from "./components/Orders/Orders";
-import Header from "./components/Header/Header";
-import AdminPanel from "./components/AdminPanel/AdminPanel";
-import SetPassword from "./components/SetPassword/SetPassword";
-import { ProtectedRoute } from './components/ProtectedRoute';
+import React, { useEffect, useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { store } from "./store/store";
+import { store } from './store/store';
 import { refreshAccessToken } from './slices/auth.slice';
-import "./App.css";
+import { useDispatch } from './hooks/custom.hooks';
+import { ProtectedRoute, Header, Login, Orders, AdminPanel, SetPassword } from './components';
+import './App.css';
 import './styles/global.css';
-import {useDispatch} from "./hooks/custom.hooks";
 
 interface LayoutProps {
     children: React.ReactNode;

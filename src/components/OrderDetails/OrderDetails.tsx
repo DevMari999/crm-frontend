@@ -1,16 +1,15 @@
-import React, { useState} from 'react';
-import {CommentInput, Order} from "../../types/order.types";
-import EditOrder from "../EditOrder/EditOrder";
+import React, {useState} from 'react';
+import {CommentInput, Order} from "../../types";
 import './OrderDetails.css';
 import edit from "../../assets/edit.png";
 import dlt from "../../assets/delete2.png";
 import dltHover from "../../assets/delete-hover.png";
-import {useDispatch} from "../../hooks/custom.hooks";
-import {addCommentToOrder, deleteCommentFromOrder, fetchOrders} from "../../slices/orders.slice";
+import {useDispatch} from "../../hooks";
+import {addCommentToOrder, deleteCommentFromOrder, fetchOrders, selectUser, selectUserId} from "../../slices";
 import {useSelector} from "react-redux";
 import {RootState} from "../../store/store";
 import {restoreScrollPosition} from "../../utils/scrollPositionUtils";
-import {selectUserId} from "../../slices/auth.slice";
+import {EditOrder } from '../';
 interface OrderDetailsProps {
     order: Order;
     commentInput: string;
@@ -30,38 +29,40 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
     const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
     const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
     const currentUserId = useSelector(selectUserId);
-
     const canEdit = !order.manager || order.manager === currentUserId;
-
+    const currentUser = useSelector(selectUser);
     const updateComment = (orderId: string, comment: string) => {
         setCommentInput(current => ({...current, [orderId]: comment}));
     };
     const handleAddComment = async (orderId: string) => {
         const comment = commentInput[orderId];
-        if (!comment) return;
+
+        if (!comment || !currentUser || !currentUser.name || !currentUserId) return;
 
         const currentScrollPosition = window.scrollY;
 
-        dispatch(addCommentToOrder({ orderId, comment, managerId: "managerId" }))
-            .unwrap()
-            .then(() => {
-                console.log('Comment added successfully');
+        const managerName = currentUser.name;
 
-                setCommentInput(current => ({...current, [orderId]: ''}));
+        if (managerName) {
+            dispatch(addCommentToOrder({ orderId, comment, managerId: currentUserId, managerName:currentUser.name }))
+                .unwrap()
+                .then(() => {
+                    console.log('Comment added successfully');
+                    setCommentInput(current => ({ ...current, [orderId]: '' }));
 
-                dispatch(fetchOrders({
-                    page: currentPage,
-                    sortBy,
-                    sortOrder,
-                    searchCriteria,
-                })).then(() => {
-
-                    restoreScrollPosition(currentScrollPosition);
+                    dispatch(fetchOrders({
+                        page: currentPage,
+                        sortBy,
+                        sortOrder,
+                        searchCriteria,
+                    })).then(() => {
+                        restoreScrollPosition(currentScrollPosition);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error adding comment:', error);
                 });
-            })
-            .catch((error) => {
-                console.error('Error adding comment:', error);
-            });
+        }
     };
 
 
@@ -70,7 +71,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
 
         const currentScrollPosition = window.scrollY;
 
-        dispatch(deleteCommentFromOrder({ orderId: order._id, commentId }))
+        dispatch(deleteCommentFromOrder({orderId: order._id, commentId}))
             .unwrap()
             .then(() => {
                 console.log("Comment deleted successfully.");
@@ -106,10 +107,17 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                                 {comment.comment}
                             </p>
                             <p className="date-highlight">
-                                {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}
+                                <div>
+                                   <p>{comment.managerName}</p>
+                                    <p>
+                                        {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                    </p>
+
+                                </div>
+
                                 {canEdit && (
                                     <img
                                         src={hoveredCommentId === comment._id ? dltHover : dlt}
@@ -120,6 +128,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                                         onClick={() => handleDeleteComment(comment._id, true)}
                                     />
                                 )}
+
                             </p>
                         </div>
                     ))}

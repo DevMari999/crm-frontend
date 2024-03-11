@@ -10,6 +10,7 @@ export interface UserTypes {
     role: string;
     banned: Boolean;
     created_at: Date;
+    last_login: Date;
 }
 
 export interface UserPaginationResult {

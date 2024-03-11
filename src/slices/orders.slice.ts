@@ -15,7 +15,31 @@ const initialState: OrdersState = {
     statusStatistics: {},
     monthlyStats: [],
     courseTypeStatistics: {},
+    uniqueGroupNames: [],
+    groupsLoading: false,
+    groupsError: null,
+    orderStatsByManager: [],
 };
+
+
+export const fetchOrderStatsByManager = createAsyncThunk(
+    'groups/fetchGroupStatistics',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/order-stats-by-manager`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                return rejectWithValue(error.message);
+            }
+            return rejectWithValue('An unknown error occurred');
+        }
+    }
+);
+
 
 export const fetchCourseTypeStatistics = createAsyncThunk(
     'orders/fetchCourseTypeStatistics',
@@ -49,7 +73,7 @@ export const fetchOrders = createAsyncThunk(
 
 export const addCommentToOrder = createAsyncThunk(
     'orders/addCommentToOrder',
-    async ({ orderId, comment, managerId }: { orderId: string; comment: string; managerId: string }, { rejectWithValue }) => {
+    async ({ orderId, comment, managerId, managerName }: { orderId: string; comment: string; managerId: string; managerName: string }, { rejectWithValue }) => {
         try {
             const response = await fetch(`http://localhost:8080/api/orders/${orderId}/comments`, {
                 method: 'POST',
@@ -57,7 +81,7 @@ export const addCommentToOrder = createAsyncThunk(
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify({ comment, managerId }),
+                body: JSON.stringify({ comment, managerId, managerName }), // Include managerName in the request body
             });
 
             if (!response.ok) {
@@ -71,6 +95,7 @@ export const addCommentToOrder = createAsyncThunk(
         }
     }
 );
+
 
 
 
@@ -108,7 +133,6 @@ export const fetchStatusStatistics = createAsyncThunk(
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        console.log('Fetched data:', data);
         return data as Record<string, number>;
     }
 );
@@ -133,6 +157,17 @@ export const fetchAllOrdersForExcel = createAsyncThunk(
             throw new Error('Network response was not ok');
         }
         return await response.json() as Order[];
+    }
+);
+
+export const fetchUniqueGroupNames = createAsyncThunk(
+    'orders/fetchUniqueGroupNames',
+    async (): Promise<string[]> => {
+        const response = await fetch(`http://localhost:8080/api/orders/groups/unique-names`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return await response.json();
     }
 );
 
@@ -163,6 +198,18 @@ const ordersSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(fetchOrderStatsByManager.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchOrderStatsByManager.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.orderStatsByManager = action.payload;
+            })
+            .addCase(fetchOrderStatsByManager.rejected, (state, action) => {
+                state.groupsLoading = false;
+                state.groupsError = action.payload as string || 'Failed to fetch groups statistics';
+            })
+
             .addCase(fetchOrders.pending, (state) => {
                 state.isLoading = true;
             })
@@ -210,6 +257,15 @@ const ordersSlice = createSlice({
             .addCase(fetchAllOrdersForExcel.fulfilled, (state, action) => {
                 state.isLoading = false;
             })
+            .addCase(fetchUniqueGroupNames.pending, (state) => {
+
+            })
+            .addCase(fetchUniqueGroupNames.fulfilled, (state, action) => {
+                state.uniqueGroupNames = action.payload;
+            })
+            .addCase(fetchUniqueGroupNames.rejected, (state) => {
+
+            })
             .addCase(fetchAllOrdersForExcel.rejected, (state) => {
                 state.isLoading = false;
 
@@ -228,6 +284,7 @@ const ordersSlice = createSlice({
             })
 
     },
+
 });
 
 export const {

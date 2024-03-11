@@ -1,0 +1,13 @@
+.edit-form input  {
+    height: 35px;
+    background-color: white;
+    border-radius: 9px;
+}
+
+.edit-form select {
+    -webkit-appearance: none;
+    height: 35px;
+    background-color: white;
+    border-radius: 9px !important;
+}
+

@@ -1,12 +1,10 @@
-import React, {useEffect} from 'react';
-import Managers from "../Managers/Managers";
-import "./AdminPanel.css";
-import StatusStatistics from "../StatusStatistics/StatusStatistics";
-import DatesStatistics from "../DatesStatistics/DatesStatistics";
-import CoursesStatistics from "../CoursesStatistics/CoursesStatistics";
-import {useForm} from 'react-hook-form';
-import {useDispatch} from "../../hooks/custom.hooks";
-import {addManager} from "../../slices/user.slice";
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useDispatch } from '../../hooks';
+import { addManager } from '../../slices';
+import { Managers, StatusStatistics, DatesStatistics, CoursesStatistics } from '../';
+import './AdminPanel.css';
+
 
 const AdminPanel: React.FC = () => {
     const {register, handleSubmit, reset, formState: {errors}} = useForm<{
@@ -73,21 +71,21 @@ const AdminPanel: React.FC = () => {
                                 <label>Name:</label>
                                 <input className="manager-input" {...register("name", {required: "Name is required"})}
                                        type="text"/>
-                                {errors.name && <p style={{color: 'red'}}>{errors.name.message}</p>}
+                                {errors.name && <p  className="error-message">{errors.name.message}</p>}
                             </div>
                             <div>
                                 <label>Last Name:</label>
                                 <input
                                     className="manager-input" {...register("lastname", {required: "Last name is required"})}
                                     type="text"/>
-                                {errors.lastname && <p style={{color: 'red'}}>{errors.lastname.message}</p>}
+                                {errors.lastname && <p className="error-message">{errors.lastname.message}</p>}
                             </div>
                             <div>
                                 <label>Email:</label>
                                 <input
                                     className="manager-input" {...register("email", {required: "Email is required", pattern: /^\S+@\S+$/i})}
                                     type="email"/>
-                                {errors.email && <p style={{color: 'red'}}>{errors.email.message}</p>}
+                                {errors.email && <p className="error-message">{errors.email.message}</p>}
                             </div>
                             {error && <div style={{color: 'red'}}>{error}</div>}
                             <button className="modal-btn-submit">Submit</button>

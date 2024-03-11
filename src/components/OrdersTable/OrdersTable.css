@@ -33,7 +33,7 @@ tr:last-child td {
     border-bottom: none;
 }
 
-thead tr {
+thead  {
     background: linear-gradient(145deg, rgba(24, 26, 35, 0.98) 0%, rgba(54, 58, 74, 0.98) 100%);
 }
 
@@ -101,7 +101,7 @@ tr:not(.additional-row, thead tr):hover {
 }
 
 .premium {
-    background: linear-gradient(135deg, rgba(71, 49, 133, 0.97) 0%, rgba(134, 31, 163, 0.97) 100%);
+    background: linear-gradient(135deg, rgba(71, 49, 133, 0.97) 0%, rgba(155, 36, 188, 0.97) 100%);
     box-shadow: 0 1px 2px grey;
 }
 
@@ -168,13 +168,17 @@ tr:not(.additional-row, thead tr):hover {
     background: linear-gradient(135deg, rgba(37, 126, 16, 0.97) 0%, rgba(203, 233, 71, 0.97) 100%);
     box-shadow: 0 1px 2px grey;
 }
+.new {
+    background: linear-gradient(135deg, rgba(15, 40, 76, 0.97) 0%, rgba(39, 114, 154, 0.97) 100%);
+    box-shadow: 0 1px 2px grey;
+}
 
 .pending {
     background: linear-gradient(135deg, rgba(40, 115, 163, 0.97) 0%, rgba(170, 208, 237, 0.97) 100%);
     box-shadow: 0 1px 2px grey;
 }
 .cancelled {
-    background: linear-gradient(135deg, rgba(102, 37, 37, 0.97) 0%, rgba(207, 66, 66, 0.97) 100%);
+    background: linear-gradient(135deg, rgba(193, 20, 20, 0.97) 0%, rgb(163, 11, 11) 100%);
     box-shadow: 0 1px 2px grey;
 }
 .completed {
@@ -184,4 +188,8 @@ tr:not(.additional-row, thead tr):hover {
 .dubbing {
     background: linear-gradient(135deg, rgba(87, 87, 87, 0.97) 0%, rgba(170, 170, 170, 0.97) 100%);
     box-shadow: 0 1px 2px grey;
+}
+
+.safari-specific thead tr {
+    background-color: #2a2d39;
 }

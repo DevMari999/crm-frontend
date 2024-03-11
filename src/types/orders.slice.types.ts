@@ -13,6 +13,17 @@ export interface CourseTypeStatistics {
     [courseType: string]: number;
 }
 
+interface OrderStatus {
+    status: string;
+    count: number;
+}
+
+interface ManagerOrderStats {
+    manager: string;
+    statuses: OrderStatus[];
+    totalOrders: string;
+}
+
 export interface OrdersState {
     data: Order[];
     isLoading: boolean;
@@ -26,4 +37,8 @@ export interface OrdersState {
     statusStatistics: Record<string, number>;
     monthlyStats: MonthlyOrderStats[];
     courseTypeStatistics: CourseTypeStatistics;
+    uniqueGroupNames: string[];
+    groupsLoading: boolean;
+    groupsError: string | null;
+    orderStatsByManager: ManagerOrderStats[];
 }

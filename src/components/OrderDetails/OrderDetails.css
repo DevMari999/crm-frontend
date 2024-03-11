@@ -93,6 +93,10 @@
     width: 100%;
     font-size: 13px;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: right;
 }
 
 .comment-text-area {

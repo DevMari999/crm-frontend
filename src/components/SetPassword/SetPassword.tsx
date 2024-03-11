@@ -46,10 +46,10 @@ const SetPassword: React.FC = () => {
     return (
         <div className="login">
             <div className="form-wrapper">
-                {errors.password && <p style={{ color: 'red' }}>Passwords must match and cannot be empty.</p>}
-                {errors.confirmPassword && <p style={{ color: 'red' }}>Passwords must match and cannot be empty.</p>}
                 <form className="form" onSubmit={handleSubmit(handleSetPassword)}>
                     <h2>Set New Password</h2>
+                    {errors.password && <p className="error-message">Cannot be empty.</p>}
+                    {errors.confirmPassword && <p className="error-message">Passwords must match.</p>}
                     <div className="form-field">
                         <label htmlFor="password">New Password:</label>
                         <input

@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+body {
+    font-size: 16px;
+}
+
 :root {
     --primary-color: rgb(22, 27, 35);
     --secondary-color: #010f18;

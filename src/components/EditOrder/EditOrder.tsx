@@ -1,11 +1,12 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
-import {fetchOrders} from "../../slices/orders.slice";
+import {fetchOrders, fetchUniqueGroupNames} from "../../slices";
 import {RootState} from "../../store/store";
 import {useForm} from "react-hook-form";
-import {Order} from "../../types/order.types";
-import {useDispatch} from "../../hooks/custom.hooks";
-
+import {Order} from "../../types";
+import {useDispatch} from "../../hooks";
+import {restoreScrollPosition} from "../../utils/scrollPositionUtils";
+import "./EditOrder.css";
 interface EditOrderProps {
     order: Order;
     onClose: () => void;
@@ -17,19 +18,42 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
     const sortBy = useSelector((state: RootState) => state.orders.sortBy);
     const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
     const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
-    const {register, handleSubmit, reset, formState: {errors}} = useForm<Partial<Order>>({
+    const {register, handleSubmit, reset, formState: {errors}, watch, setValue} = useForm<Partial<Order>>({
         defaultValues: order
     });
-
+    const uniqueGroupNames = useSelector((state: RootState) => state.orders.uniqueGroupNames);
+    const [isAddingNewGroup, setIsAddingNewGroup] = useState(false);
     useEffect(() => {
         document.body.style.overflow = 'hidden';
+        dispatch(fetchUniqueGroupNames());
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, []);
+    }, [dispatch]);
+
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+
+        dispatch(fetchUniqueGroupNames());
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [dispatch]);
+
+    const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        if (e.target.value === 'newGroup') {
+            setIsAddingNewGroup(true);
+            setValue('group', '');
+        } else {
+            setIsAddingNewGroup(false);
+            setValue('group', e.target.value);
+        }
+    };
 
     const onSubmit = async (data: Partial<Order>) => {
         try {
+            const currentScrollPosition = window.scrollY;
+
             const response = await fetch(`http://localhost:8080/api/orders/${order._id}`, {
                 method: 'PUT',
                 headers: {
@@ -51,7 +75,7 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
                 sortOrder,
                 searchCriteria,
             })).then(() => {
-                window.scrollTo(0, window.scrollY);
+                restoreScrollPosition(currentScrollPosition);
                 onClose();
             });
         } catch (error) {
@@ -61,7 +85,7 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
 
     return (
         <div className="edit-order global-modal">
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form  className="edit-form" onSubmit={handleSubmit(onSubmit)}>
                 <label>
                     Name:
                     <input {...register("name")} type="text"/>
@@ -100,7 +124,7 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
                     Status:
                     <select {...register("status")}>
                         <option value="">Select</option>
-                        {['pending', 'completed', 'cancelled', 'in work', 'dubbing'].map((statusOption) => (
+                        {['pending', 'completed', 'cancelled', 'in work', 'dubbing', 'new'].map((statusOption) => (
                             <option key={statusOption} value={statusOption}>{statusOption}</option>
                         ))}
                     </select>
@@ -144,9 +168,25 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
 
                 <label>
                     Group:
-                    <input {...register("group")} type="text"/>
+                    {!isAddingNewGroup ? (
+                        <select {...register('group')} onChange={handleGroupChange}>
+                            <option value="">Select Group</option>
+                            {uniqueGroupNames.map((name) => (
+                                <option key={name} value={name}>
+                                    {name}
+                                </option>
+                            ))}
+                            <option value="newGroup">+ Add New Group</option>
+                        </select>
+                    ) : (
+                        <input
+                            {...register('group')}
+                            type="text"
+                            placeholder="New group name"
+                        />
+                    )}
                 </label>
-                <button className="modal-btn-submit" >Save</button>
+                <button className="modal-btn-submit">Save</button>
                 <button className="modal-btn-cancel" onClick={onClose}>Cancel</button>
 
             </form>

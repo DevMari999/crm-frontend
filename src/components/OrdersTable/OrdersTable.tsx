@@ -1,17 +1,16 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux'
-import {useNavigate, useLocation} from 'react-router-dom';
-import {AppDispatch, RootState} from '../../store/store';
-import { fetchOrders, setCurrentPage, setExpandedRow, setSortBy} from '../../slices/orders.slice';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { AppDispatch, RootState } from '../../store/store';
+import { fetchOrders, setCurrentPage, setExpandedRow, setSortBy } from '../../slices';
 import './OrdersTable.css';
 import Pagination from "../Pagination/Pagination";
-import OrderDetails from "../OrderDetails/OrderDetails";
-import {CommentInput} from "../../types/order.types";
+import { CommentInput } from "../../types";
 import Loader from "../Loader/Loader";
+import { OrderDetails } from '../';
 
 const OrdersTable = () => {
     const navigate = useNavigate();
-    const location = useLocation();
     const dispatch = useDispatch<AppDispatch>();
     const itemsPerPage = 25;
     const orders = useSelector((state: RootState) => state.orders.data);
@@ -25,6 +24,12 @@ const OrdersTable = () => {
     const expandedRow = useSelector((state: RootState) => state.orders.expandedRowId);
     const [managerLastNames, setManagerLastNames] = useState<Record<string, string>>({});
     const fetchedManagerIds = useRef(new Set());
+
+
+
+    if (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {
+        document.body.classList.add('safari-specific');
+    }
 
     useEffect(() => {
         orders.forEach((order) => {
@@ -54,32 +59,6 @@ const OrdersTable = () => {
             }
         });
     }, [orders]);
-
-    useEffect(() => {
-        const queryParams = new URLSearchParams();
-
-        queryParams.set('page', currentPage.toString());
-        queryParams.set('sortBy', sortBy);
-        queryParams.set('sortOrder', sortOrder);
-
-        Object.entries(searchCriteria).forEach(([key, value]) => {
-            if (value) {
-                queryParams.set(key, value.toString());
-            }
-        });
-
-        navigate({
-            pathname: location.pathname,
-            search: `?${queryParams.toString()}`,
-        }, { replace: true });
-
-        dispatch(fetchOrders({
-            page: currentPage,
-            sortBy,
-            sortOrder,
-            searchCriteria,
-        }));
-    }, [currentPage, sortBy, sortOrder, searchCriteria, navigate, dispatch]);
 
 
     const updatePageInUrl = (newPage: number) => {
@@ -184,6 +163,8 @@ const OrdersTable = () => {
                                     <div className="in-work status">in work</div>
                                 ) : order.status === 'pending' ? (
                                     <div className="pending status">pending</div>
+                                ) :  order.status === 'new' ? (
+                                    <div className="new status">new</div>
                                 ) : order.status === 'dubbing' ? (
                                     <div className="dubbing status">dubbing</div>
                                 ) : order.status === 'cancelled' ? (

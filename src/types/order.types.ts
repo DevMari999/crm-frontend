@@ -3,6 +3,7 @@ export interface Comment {
     managerId: string;
     comment: string;
     createdAt: Date;
+    managerName: string;
 }
 
 export interface Order {
@@ -24,6 +25,7 @@ export interface Order {
     group: string | null;
     manager: string | null;
     comments: Comment[];
+    groupsError: string | null;
 }
 
 export interface PaginationResult {
