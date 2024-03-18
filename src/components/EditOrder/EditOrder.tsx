@@ -7,6 +7,7 @@ import {Order} from "../../types";
 import {useDispatch} from "../../hooks";
 import {restoreScrollPosition} from "../../utils/scrollPositionUtils";
 import "./EditOrder.css";
+import config from "../../configs/configs";
 interface EditOrderProps {
     order: Order;
     onClose: () => void;
@@ -51,10 +52,11 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
     };
 
     const onSubmit = async (data: Partial<Order>) => {
+        console.log(typeof data.already_paid);
         try {
             const currentScrollPosition = window.scrollY;
 
-            const response = await fetch(`http://localhost:8080/api/orders/${order._id}`, {
+            const response = await fetch(`${config.baseUrl}/api/orders/${order._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

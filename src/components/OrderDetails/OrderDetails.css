@@ -65,11 +65,11 @@
 
 .comment {
     margin: 20px 0;
-    border-bottom: solid 0.03em #f5f6f8;
     width: 750px;
     position: relative;
-    box-shadow: 1px 2px 3px #e4e4e4;
     padding: 15px;
+    box-shadow: 1px 2px 3px rgba(206, 206, 206, 0.8);
+    border: solid 0.02em #eeeeee;
 
 }
 
@@ -122,4 +122,6 @@
     cursor: pointer;
 }
 
-
+.date-highlight p {
+    margin-left: 7px;
+}

@@ -13,6 +13,7 @@ import {Pagination, CustomModal } from '../';
 import './Managers.css';
 import {useDispatch} from "../../hooks";
 import {restoreScrollPosition} from "../../utils/scrollPositionUtils";
+import {useNavigate} from "react-router-dom";
 
 
 const Managers: React.FC = () => {
@@ -27,20 +28,19 @@ const Managers: React.FC = () => {
     const [userIdToDelete, setUserIdToDelete] = useState('');
     const [activationLinks, setActivationLinks] = useState<{ [key: string]: { link: string | null; visible: boolean } }>({});
     const orderStatsByManager = useSelector((state: RootState) => state.orders.orderStatsByManager);
-
+    const navigate = useNavigate();
 
     useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = parseInt(urlParams.get('page') || '1', 10);
         dispatch(fetchManagers({page: currentPage, limit}));
         dispatch(fetchOrderStatsByManager());
     }, [dispatch, currentPage, limit]);
 
-
-    useEffect(() => {
-        dispatch(fetchManagers({page: currentPage, limit}));
-    }, [dispatch, currentPage, limit]);
-
     const updatePage = (newPage: number) => {
         setCurrentPage(newPage);
+        dispatch(fetchManagers({page: newPage, limit}));
+        navigate(`/admin?page=${newPage}`, { replace: true });
     };
 
     useEffect(() => {
@@ -51,6 +51,7 @@ const Managers: React.FC = () => {
             body?.classList.remove('modal-open');
         }
     }, [isModalOpen]);
+
     const handleOpenModal = (action: string, userId?: string) => {
         setAction(action);
         if (userId) setUserIdToDelete(userId);
@@ -63,73 +64,55 @@ const Managers: React.FC = () => {
 
     const handleConfirmAction = () => {
         handleCloseModal();
-        const currentScrollPosition = window.scrollY;
-        switch (action) {
-            case 'ban':
-                dispatch(banManager(userIdToDelete))
-                    .unwrap()
-                    .then(() => {
-                        dispatch(fetchManagers({page: currentPage, limit}));
-                    }).then(() => {
-                    setTimeout(() => restoreScrollPosition(currentScrollPosition), 100);
-                })
-                    .catch(() => {
-                        alert('Failed to ban manager.');
-                    });
-                break;
-            case 'unban':
-                dispatch(unbanManager(userIdToDelete))
-                    .unwrap()
-                    .then(() => {
-                        dispatch(fetchManagers({page: currentPage, limit}));
-                    }).then(() => {
-                    setTimeout(() => restoreScrollPosition(currentScrollPosition), 100);
-                })
-                    .catch(() => {
-                        alert('Failed to unban manager.');
-                    });
-                break;
-            case 'delete':
-                dispatch(deleteManager(userIdToDelete))
-                    .unwrap()
-                    .then(() => {
-                        const isLastManagerOnPage = managers.length === 1;
-                        let newCurrentPage = currentPage;
-                        if (isLastManagerOnPage && currentPage > 1) {
-                            newCurrentPage = currentPage - 1;
+        const performAction = async () => {
+            try {
+                switch (action) {
+                    case 'ban':
+                        await dispatch(banManager(userIdToDelete)).unwrap();
+                        break;
+                    case 'unban':
+                        await dispatch(unbanManager(userIdToDelete)).unwrap();
+                        break;
+                    case 'delete':
+                        await dispatch(deleteManager(userIdToDelete)).unwrap();
+                        const updatedManagers = managers.filter(manager => manager._id !== userIdToDelete);
+                        if (managers.length === 1 && currentPage > 1) {
+                            setCurrentPage(currentPage - 1);
+                        } else {
                         }
-                        setCurrentPage(newCurrentPage);
-                        dispatch(fetchManagers({page: newCurrentPage, limit}));
-                    }).then(() => {
-                    setTimeout(() => restoreScrollPosition(currentScrollPosition), 100);
-                })
-                    .catch(() => {
-                        alert('Failed to delete manager.');
-                    });
-                break;
-            default:
-                break;
-        }
+                        break;
+                    default:
+                        break;
+                }
+            } catch (error) {
+                alert(`Failed to ${action} manager.`);
+            }
+        };
+        performAction();
     };
 
     const handleActivateManager = (userId: string) => {
-        const currentScrollPosition = window.scrollY;
         dispatch(generateActivationLinkForManager(userId))
             .unwrap()
             .then((response) => {
                 const link = response.activationLink;
-                setActivationLinks(prev => ({...prev, [userId]: {link, visible: true}}));
+                setActivationLinks(prev => ({
+                    ...prev,
+                    [userId]: { link, visible: true }
+                }));
 
                 setTimeout(() => {
-                    setActivationLinks(prev => ({...prev, [userId]: {...prev[userId], visible: false}}));
+                    setActivationLinks(prev => ({
+                        ...prev,
+                        [userId]: { ...prev[userId], visible: false }
+                    }));
                 }, 3600000);
-            }).then(() => {
-            setTimeout(() => restoreScrollPosition(currentScrollPosition), 100);
-        })
+            })
             .catch((error) => {
                 console.error('Error generating activation link:', error);
                 alert('Failed to generate activation link.');
             });
+
     };
 
     const copyToClipboard = (userId: string) => {

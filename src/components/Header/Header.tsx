@@ -7,6 +7,7 @@ import admin from "../../assets/admin.png";
 import { useSelector } from 'react-redux';
 import {fetchUserDetails, selectUserRole} from '../../slices';
 import {useDispatch} from "../../hooks";
+import config from "../../configs/configs";
 
 const Header = () => {
     const navigate = useNavigate();
@@ -17,7 +18,7 @@ const Header = () => {
     const isUserAdmin = userRole === 'admin';
     const dispatch = useDispatch();
     const handleLogout = async () => {
-        await fetch('http://localhost:8080/api/auth/logout', {
+        await fetch(`${config.baseUrl}/api/auth/logout`, {
             method: 'POST',
             credentials: 'include',
             headers: {

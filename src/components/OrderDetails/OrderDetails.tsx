@@ -5,7 +5,14 @@ import edit from "../../assets/edit.png";
 import dlt from "../../assets/delete2.png";
 import dltHover from "../../assets/delete-hover.png";
 import {useDispatch} from "../../hooks";
-import {addCommentToOrder, deleteCommentFromOrder, fetchOrders, selectUser, selectUserId} from "../../slices";
+import {
+    addCommentToOrder,
+    deleteCommentFromOrder,
+    fetchOrders,
+    selectUser,
+    selectUserId,
+    selectUserRole
+} from "../../slices";
 import {useSelector} from "react-redux";
 import {RootState} from "../../store/store";
 import {restoreScrollPosition} from "../../utils/scrollPositionUtils";
@@ -29,8 +36,9 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
     const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
     const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
     const currentUserId = useSelector(selectUserId);
-    const canEdit = !order.manager || order.manager === currentUserId;
     const currentUser = useSelector(selectUser);
+    const userRole = useSelector(selectUserRole);
+    const canEdit = userRole === 'admin' || order.manager === currentUserId;
     const updateComment = (orderId: string, comment: string) => {
         setCommentInput(current => ({...current, [orderId]: comment}));
     };
@@ -107,16 +115,13 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                                 {comment.comment}
                             </p>
                             <p className="date-highlight">
-                                <div>
-                                   <p>{comment.managerName}</p>
+                                   <p>{comment.managerName} </p>
                                     <p>
                                         {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString([], {
                                         hour: '2-digit',
                                         minute: '2-digit'
                                     })}
                                     </p>
-
-                                </div>
 
                                 {canEdit && (
                                     <img

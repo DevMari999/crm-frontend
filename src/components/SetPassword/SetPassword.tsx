@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import config from "../../configs/configs";
 
 interface IFormInput {
     password: string;
@@ -21,7 +22,7 @@ const SetPassword: React.FC = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/auth/set-password', {
+            const response = await fetch(`${config.baseUrl}/api/auth/set-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -48,23 +49,32 @@ const SetPassword: React.FC = () => {
             <div className="form-wrapper">
                 <form className="form" onSubmit={handleSubmit(handleSetPassword)}>
                     <h2>Set New Password</h2>
-                    {errors.password && <p className="error-message">Cannot be empty.</p>}
-                    {errors.confirmPassword && <p className="error-message">Passwords must match.</p>}
                     <div className="form-field">
                         <label htmlFor="password">New Password:</label>
                         <input
                             type="password"
                             id="password"
-                            {...register("password", { required: true })}
+                            {...register("password", {
+                                required: "Password is required",
+                                minLength: {
+                                    value: 8,
+                                    message: "Password must be at least 8 characters long"
+                                }
+                            })}
                         />
+                        {errors.password && <p className="error-message">{errors.password.message}</p>}
                     </div>
                     <div className="form-field">
                         <label htmlFor="confirmPassword">Confirm New Password:</label>
                         <input
                             type="password"
                             id="confirmPassword"
-                            {...register("confirmPassword", { validate: value => value === watch('password') || "The passwords do not match" })}
+                            {...register("confirmPassword", {
+                                validate: value =>
+                                    value === watch('password') || "The passwords do not match"
+                            })}
                         />
+                        {errors.confirmPassword && <p className="error-message">{errors.confirmPassword.message}</p>}
                     </div>
                     <button className="login-btn" type="submit">Set Password</button>
                 </form>

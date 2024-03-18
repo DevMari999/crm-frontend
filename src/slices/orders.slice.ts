@@ -1,6 +1,6 @@
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
-import {Order, PaginationResult} from '../types/order.types';
-import {CourseTypeStatistics, MonthlyOrderStats, OrdersState} from "../types/orders.slice.types";
+import {CourseTypeStatistics, MonthlyOrderStats, OrdersState, Order, PaginationResult} from "../types";
+import config from "../configs/configs";
 
 const initialState: OrdersState = {
     data: [],
@@ -12,9 +12,6 @@ const initialState: OrdersState = {
     searchCriteria: {},
     isRowExpanded: false,
     expandedRowId: null,
-    statusStatistics: {},
-    monthlyStats: [],
-    courseTypeStatistics: {},
     uniqueGroupNames: [],
     groupsLoading: false,
     groupsError: null,
@@ -26,7 +23,7 @@ export const fetchOrderStatsByManager = createAsyncThunk(
     'groups/fetchGroupStatistics',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/order-stats-by-manager`);
+            const response = await fetch(`${config.baseUrl}/api/orders/order-stats-by-manager`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -40,17 +37,6 @@ export const fetchOrderStatsByManager = createAsyncThunk(
     }
 );
 
-
-export const fetchCourseTypeStatistics = createAsyncThunk(
-    'orders/fetchCourseTypeStatistics',
-    async (): Promise<CourseTypeStatistics> => {
-        const response = await fetch(`http://localhost:8080/api/course-type-statistics`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return await response.json() as CourseTypeStatistics;
-    }
-);
 export const fetchOrders = createAsyncThunk(
     'orders/fetchOrders',
     async ({page, sortBy, sortOrder, searchCriteria}:
@@ -62,7 +48,7 @@ export const fetchOrders = createAsyncThunk(
                }): Promise<PaginationResult> => {
         const queryParams = new URLSearchParams({page: page.toString(), sortBy, sortOrder});
         queryParams.set('searchCriteria', JSON.stringify(searchCriteria));
-        const response = await fetch(`http://localhost:8080/api/orders?${queryParams}`);
+        const response = await fetch(`${config.baseUrl}/api/orders?${queryParams}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -75,13 +61,13 @@ export const addCommentToOrder = createAsyncThunk(
     'orders/addCommentToOrder',
     async ({ orderId, comment, managerId, managerName }: { orderId: string; comment: string; managerId: string; managerName: string }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/orders/${orderId}/comments`, {
+            const response = await fetch(`${config.baseUrl}/api/orders/${orderId}/comments`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify({ comment, managerId, managerName }), // Include managerName in the request body
+                body: JSON.stringify({ comment, managerId, managerName }),
             });
 
             if (!response.ok) {
@@ -103,7 +89,7 @@ export const deleteCommentFromOrder = createAsyncThunk(
     'orders/deleteCommentFromOrder',
     async ({ orderId, commentId }: { orderId: string; commentId: string }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/orders/${orderId}/comments/${commentId}`, {
+            const response = await fetch(`${config.baseUrl}/api/orders/${orderId}/comments/${commentId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -122,37 +108,10 @@ export const deleteCommentFromOrder = createAsyncThunk(
     }
 );
 
-
-
-
-export const fetchStatusStatistics = createAsyncThunk(
-    'orders/fetchStatusStatistics',
-    async (): Promise<Record<string, number>> => {
-        const response = await fetch(`http://localhost:8080/api/orders/status-statistics`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        return data as Record<string, number>;
-    }
-);
-
-
-export const fetchOrdersGroupedByMonth = createAsyncThunk(
-    'orders/fetchOrdersGroupedByMonth',
-    async (): Promise<MonthlyOrderStats[]> => {
-        const response = await fetch(`http://localhost:8080/api/orders-by-month`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return await response.json() as MonthlyOrderStats[];
-    }
-);
-
 export const fetchAllOrdersForExcel = createAsyncThunk(
     'orders/fetchAllOrdersForExcel',
     async (): Promise<Order[]> => {
-        const response = await fetch(`http://localhost:8080/api/orders/excel`);
+        const response = await fetch(`${config.baseUrl}/api/orders/excel`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -163,7 +122,7 @@ export const fetchAllOrdersForExcel = createAsyncThunk(
 export const fetchUniqueGroupNames = createAsyncThunk(
     'orders/fetchUniqueGroupNames',
     async (): Promise<string[]> => {
-        const response = await fetch(`http://localhost:8080/api/orders/groups/unique-names`);
+        const response = await fetch(`${config.baseUrl}/api/orders/groups/unique-names`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -179,9 +138,16 @@ const ordersSlice = createSlice({
         setCurrentPage: (state, action: PayloadAction<number>) => {
             state.currentPage = action.payload;
         },
-        setSortBy: (state, action: PayloadAction<string>) => {
-            state.sortBy = action.payload;
-            state.sortOrder = state.sortOrder === 'asc' ? 'desc' : 'asc';
+        setSortBy: (state, action: PayloadAction<{ field: string; sortOrder?: 'asc' | 'desc' }>) => {
+            state.sortBy = action.payload.field;
+            if (action.payload.sortOrder) {
+                state.sortOrder = action.payload.sortOrder;
+            }
+        },
+
+        resetSort: (state) => {
+            state.sortBy = 'created_at';
+            state.sortOrder = 'desc';
         },
         setSearchCriteria: (state, action: PayloadAction<Record<string, any>>) => {
             state.searchCriteria = action.payload;
@@ -219,36 +185,6 @@ const ordersSlice = createSlice({
                 state.totalPages = action.payload.totalPages;
             })
             .addCase(fetchOrders.rejected, (state) => {
-                state.isLoading = false;
-            })
-            .addCase(fetchStatusStatistics.pending, (state) => {
-                state.isLoading = true;
-            })
-            .addCase(fetchStatusStatistics.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.statusStatistics = action.payload;
-            })
-            .addCase(fetchStatusStatistics.rejected, (state) => {
-                state.isLoading = false;
-            })
-            .addCase(fetchOrdersGroupedByMonth.pending, (state) => {
-                state.isLoading = true;
-            })
-            .addCase(fetchOrdersGroupedByMonth.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.monthlyStats = action.payload;
-            })
-            .addCase(fetchOrdersGroupedByMonth.rejected, (state) => {
-                state.isLoading = false;
-            })
-            .addCase(fetchCourseTypeStatistics.pending, (state) => {
-                state.isLoading = true;
-            })
-            .addCase(fetchCourseTypeStatistics.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.courseTypeStatistics = action.payload; // Set the fetched course type statistics in the state
-            })
-            .addCase(fetchCourseTypeStatistics.rejected, (state) => {
                 state.isLoading = false;
             })
             .addCase(fetchAllOrdersForExcel.pending, (state) => {
@@ -292,6 +228,7 @@ export const {
     setSortBy,
     setSearchCriteria,
     toggleRowExpanded,
+    resetSort,
     setRowExpanded,
     setExpandedRow
 } = ordersSlice.actions;

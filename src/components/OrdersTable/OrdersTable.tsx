@@ -8,6 +8,7 @@ import Pagination from "../Pagination/Pagination";
 import { CommentInput } from "../../types";
 import Loader from "../Loader/Loader";
 import { OrderDetails } from '../';
+import config from "../../configs/configs";
 
 const OrdersTable = () => {
     const navigate = useNavigate();
@@ -25,8 +26,6 @@ const OrdersTable = () => {
     const [managerLastNames, setManagerLastNames] = useState<Record<string, string>>({});
     const fetchedManagerIds = useRef(new Set());
 
-
-
     if (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {
         document.body.classList.add('safari-specific');
     }
@@ -37,7 +36,7 @@ const OrdersTable = () => {
 
             if (managerId && !fetchedManagerIds.current.has(managerId)) {
                 fetchedManagerIds.current.add(managerId);
-                fetch(`http://localhost:8080/api/users/${managerId}`)
+                fetch(`${config.baseUrl}/api/users/${managerId}`)
                     .then((response) => {
                         if (!response.ok) {
                             throw new Error('Failed to fetch');
@@ -45,7 +44,6 @@ const OrdersTable = () => {
                         return response.json();
                     })
                     .then((userData) => {
-                        console.log("User Data:", userData);
                         setManagerLastNames(prev => ({
                             ...prev,
                             [managerId]: userData.lastname,
@@ -53,7 +51,6 @@ const OrdersTable = () => {
                     })
 
                     .catch((error) => {
-                        console.error("Failed to fetch user data:", error);
                         fetchedManagerIds.current.delete(managerId);
                     });
             }
@@ -67,15 +64,20 @@ const OrdersTable = () => {
     };
 
     const handleSort = (field: string) => {
-        const newSortOrder = field === sortBy ? (sortOrder === 'asc' ? 'desc' : 'asc') : 'asc';
-        dispatch(setSortBy(field));
+        const newSortOrder = field === sortBy && sortOrder === 'asc' ? 'desc' : 'asc';
+        dispatch(setSortBy({ field, sortOrder: newSortOrder }));
+    };
+
+
+    useEffect(() => {
         dispatch(fetchOrders({
             page: currentPage,
-            sortBy: field,
-            sortOrder: newSortOrder,
+            sortBy,
+            sortOrder,
             searchCriteria
         }));
-    };
+    }, [dispatch, currentPage, sortBy, sortOrder, searchCriteria]);
+
 
     const toggleRow = (id: string) => {
         if (expandedRow === id) {
@@ -126,9 +128,9 @@ const OrdersTable = () => {
                             </td>
                             <td>
                                 {order.course_format === 'online' ? (
-                                    <div className="online-format">ONLINE</div>
+                                    <div className="online-format">online</div>
                                 ) : order.course_format === 'static' ? (
-                                    <div className="static-format">STATIC</div>
+                                    <div className="static-format">static</div>
                                 ) : (
                                     'N/A'
                                 )}

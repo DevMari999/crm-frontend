@@ -5,9 +5,11 @@
 .pagination-controls button {
     background: linear-gradient(145deg, rgba(29, 31, 42, 0.95) 0%, rgba(54, 58, 74, 0.95) 100%);
     color: #ededed;
-    border-radius: 10px;
+    border-radius: 15px;
     margin: 0 7px;
-    padding: 2px 8px 4px 8px;
+    padding: 2px 8px 4px 7px;
+    min-width: 28px;
+    height: 28px;
     cursor: pointer;
     border: solid #101b29 1px;
     font-size: 15px;
@@ -29,7 +31,4 @@
     font-size: 15px;
 }
 
-.arrows {
-    height: 12px;
-    margin-right: 6px;
-}
+

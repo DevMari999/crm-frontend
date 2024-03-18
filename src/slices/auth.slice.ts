@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store/store';
+import config from "../configs/configs";
 
 interface User {
     userId: string;
@@ -23,7 +24,7 @@ export const refreshAccessToken = createAsyncThunk(
     'auth/refreshAccessToken',
     async (_, { getState, dispatch, rejectWithValue }) => {
         try {
-            const response = await fetch('http://localhost:8080/api/auth/refresh', {
+            const response = await fetch(`${config.baseUrl}/api/auth/refresh`, {
                 method: 'POST',
                 credentials: 'include',
             });
@@ -45,7 +46,7 @@ export const fetchUserDetails = createAsyncThunk(
     'auth/fetchUserDetails',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await fetch('http://localhost:8080/api/auth/user-details', {
+            const response = await fetch(`${config.baseUrl}/api/auth/user-details`, {
                 credentials: 'include',
             });
             if (!response.ok) {

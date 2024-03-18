@@ -3,7 +3,7 @@
     height: 32px;
     border: 1px solid black;
     min-width: 82px;
-    border-radius: 10px;
+    border-radius: 12px;
     color: white;
     box-shadow: 1px 2px 3px rgba(144, 144, 144, 0.87);
     transition: all 0.4s ease;
@@ -16,7 +16,7 @@
 }
 
 .global-block {
-    background: rgba(243, 245, 247, 0.6);
+    background: rgba(245, 247, 249, 0.6);
     border-radius: 10px;
 }
 
@@ -74,7 +74,7 @@
     height: 40px;
     border: 1px solid black;
     width: 100%;
-    border-radius: 10px;
+    border-radius: 12px;
     color: white;
     box-shadow: 1px 2px 3px rgba(144, 144, 144, 0.87);
     cursor: pointer;
@@ -86,7 +86,7 @@
     height: 40px;
     border: 1px solid #8f1919;
     width: 100%;
-    border-radius: 10px;
+    border-radius: 12px;
     color: white;
     box-shadow: 1px 2px 3px rgba(144, 144, 144, 0.87);
     cursor: pointer;

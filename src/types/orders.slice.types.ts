@@ -34,9 +34,6 @@ export interface OrdersState {
     searchCriteria: Record<string, any>;
     isRowExpanded: boolean;
     expandedRowId: string | null;
-    statusStatistics: Record<string, number>;
-    monthlyStats: MonthlyOrderStats[];
-    courseTypeStatistics: CourseTypeStatistics;
     uniqueGroupNames: string[];
     groupsLoading: boolean;
     groupsError: string | null;

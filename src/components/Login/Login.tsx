@@ -6,6 +6,7 @@ import "./Login.css";
 
 import { selectUserRole, fetchUserDetails } from '../../slices';
 import {useDispatch} from "../../hooks";
+import config from "../../configs/configs";
 interface LoginFormInputs {
     email: string;
     password: string;
@@ -22,7 +23,7 @@ const Login = () => {
 
     const onSubmit = async (data: LoginFormInputs) => {
         const { email, password } = data;
-        const loginUrl = 'http://localhost:8080/api/auth/login';
+        const loginUrl = `${config.baseUrl}/api/auth/login`;
 
         try {
             const response = await fetch(loginUrl, {

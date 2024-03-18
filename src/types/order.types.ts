@@ -37,6 +37,24 @@ export interface CommentInput {
     [orderId: string]: string;
 }
 
-export interface TempComments {
-    [orderId: string]: string[];
+export interface StatusStatistic {
+    _id: string | null;
+    count: number;
+}
+
+export interface ChartDataState {
+    labels: string[];
+    datasets: Array<{
+        data: number[];
+        backgroundColor: string[];
+        hoverBackgroundColor: string[];
+    }>;
+}
+
+export interface MonthlyStat {
+    _id: {
+        month: string;
+        year: string;
+    };
+    count: number;
 }

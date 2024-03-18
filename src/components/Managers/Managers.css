@@ -6,15 +6,15 @@
 }
 
 .each-manager {
-    height: 170px;
+    height: 180px;
     margin: 20px 30px;
     font-size: 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 30px !important;
-    border: #e3e3e3 0.03em solid;
-    box-shadow: 1px 2px 3px rgba(214, 214, 214, 0.8);
+    box-shadow: 1px 2px 3px rgba(206, 206, 206, 0.8);
+    border: solid 0.02em #eeeeee;
 }
 
 

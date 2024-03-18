@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import Chart from 'chart.js/auto';
-
+import config from "../../configs/configs";
 const CoursesStatistics: React.FC = () => {
     const [courseData, setCourseData] = useState<{ courseType: string; count: number }[]>([]);
     const chartContainer = useRef<HTMLCanvasElement>(null);
@@ -9,7 +9,7 @@ const CoursesStatistics: React.FC = () => {
     useEffect(() => {
         const fetchCourseData = async () => {
             try {
-                const response = await fetch('http://localhost:8080/api/course-type-statistics');
+                const response = await fetch(`${config.baseUrl}/api/orders/course-type-statistics`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch course data');
                 }

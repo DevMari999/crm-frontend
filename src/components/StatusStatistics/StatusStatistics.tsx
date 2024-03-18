@@ -1,79 +1,61 @@
-import React, {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {fetchStatusStatistics} from '../../slices';
-import {Doughnut} from 'react-chartjs-2';
-import {Chart as ChartJS, ArcElement, Tooltip, Legend} from 'chart.js';
-import {useDispatch} from "../../hooks";
+import React, { useEffect, useState } from 'react';
+import { Doughnut } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import config from "../../configs/configs";
+import {ChartDataState, StatusStatistic} from "../../types";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface RootState {
-    orders: {
-        statusStatistics: Array<{ _id: string | null, count: number }>;
-    };
-}
-
-interface ChartDataState {
-    labels: string[];
-    datasets: Array<{
-        data: number[];
-        backgroundColor: string[];
-        hoverBackgroundColor: string[];
-    }>;
-}
-
-export const StatusStatistics: React.FC = () => {
-    const dispatch = useDispatch();
-    const statusStatistics = useSelector((state: RootState) => state.orders.statusStatistics);
+const StatusStatistics: React.FC = () => {
+    const [statusStatistics, setStatusStatistics] = useState<StatusStatistic[]>([]);
     const [chartData, setChartData] = useState<ChartDataState>({
         labels: [],
-        datasets: [
-            {
-                data: [],
-                backgroundColor: [],
-                hoverBackgroundColor: [],
-            },
-        ],
+        datasets: [{
+            data: [],
+            backgroundColor: [],
+            hoverBackgroundColor: [],
+        }],
     });
 
     useEffect(() => {
-        dispatch(fetchStatusStatistics());
-    }, [dispatch]);
+        const fetchStatusStatistics = async () => {
+            try {
+                const response = await fetch(`${config.baseUrl}/api/orders/status-statistics`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch status statistics');
+                }
+                const data = await response.json();
+                setStatusStatistics(data);
+            } catch (error) {
+                console.error('Error fetching status statistics:', error);
+            }
+        };
+
+        fetchStatusStatistics();
+    }, []);
 
     useEffect(() => {
-        if (Array.isArray(statusStatistics) && statusStatistics.length > 0) {
+        if (statusStatistics.length > 0) {
             const labelColorMap: Record<string, string> = {
-                'in work': '#dd506e',
+                'in work': '#709ab5',
                 'pending': '#102b3c',
-                'completed': '#2d572f',
+                'completed': '#395e3f',
                 'cancelled': 'rgba(64,185,172,0.8)',
-                'dubbing': '#f4d15d',
+                'dubbing': '#cbcbcb',
                 'new': '#6d1516',
             };
 
-            const labels: string[] = [];
-            const data: number[] = [];
-            const backgroundColors: string[] = [];
-
-            statusStatistics.forEach(stat => {
-                const label = stat._id || 'Unknown';
-                const count = stat.count;
-
-                labels.push(label);
-                data.push(count);
-
-                backgroundColors.push(labelColorMap[label] || getRandomColor(label));
-            });
+            const labels: string[] = statusStatistics.map(stat => stat._id || 'Unknown');
+            const data: number[] = statusStatistics.map(stat => stat.count);
+            const backgroundColors: string[] = labels.map(label => labelColorMap[label] || getRandomColor(label));
 
             setChartData({
                 labels,
-                datasets: [
-                    {
-                        data,
-                        backgroundColor: backgroundColors,
-                        hoverBackgroundColor: backgroundColors,
-                    },
-                ],
+                datasets: [{
+                    data,
+                    backgroundColor: backgroundColors,
+                    hoverBackgroundColor: backgroundColors,
+                }],
             });
         }
     }, [statusStatistics]);
@@ -84,13 +66,10 @@ export const StatusStatistics: React.FC = () => {
 
     const hashCode = (str: string): number => {
         let hash = 0;
-        if (str.length === 0) {
-            return hash;
-        }
         for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
             hash = (hash << 5) - hash + char;
-            hash = hash & hash;
+            hash |= 0;
         }
         return hash;
     };
@@ -104,19 +83,15 @@ export const StatusStatistics: React.FC = () => {
             },
             tooltip: {
                 callbacks: {
-                    label: (context: any) => {
-                        const label = context.label || '';
-                        const value = context.parsed || 0;
-                        return `${label}: ${value}`;
-                    },
+                    label: (context: any) => `${context.label}: ${context.parsed}`,
                 },
             },
         },
     };
 
     return (
-        <div style={{width: '330px', height: '240px'}}>
-            <Doughnut data={chartData} options={options}/>
+        <div style={{ width: '330px', height: '240px' }}>
+            <Doughnut data={chartData} options={options} />
         </div>
     );
 };

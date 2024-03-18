@@ -306,7 +306,14 @@
 import React, {useEffect, useState} from 'react';
 import {OrdersTable } from '../';
 import "./Orders.css";
-import {fetchAllOrdersForExcel, fetchOrders, setRowExpanded, setSearchCriteria, selectUserId} from "../../slices";
+import {
+    fetchAllOrdersForExcel,
+    fetchOrders,
+    setRowExpanded,
+    setSearchCriteria,
+    selectUserId,
+    resetSort, setSortBy
+} from "../../slices";
 import { useSelector} from 'react-redux';
 import {useDebounce, useDispatch} from '../../hooks';
 import * as XLSX from 'xlsx';
@@ -348,7 +355,6 @@ const Orders = () => {
     const currentPage = useSelector((state: RootState) => state.orders.currentPage);
     const sortBy = useSelector((state: RootState) => state.orders.sortBy);
     const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
-    const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
     const handleMyOrdersChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const isChecked = e.target.checked;
         setShowMyOrders(isChecked);
@@ -388,15 +394,14 @@ const Orders = () => {
         };
         dispatch(setSearchCriteria(searchCriteria));
         dispatch(setRowExpanded(null));
-        dispatch(fetchOrders({
-            page: currentPage,
-            sortBy: sortBy,
-            sortOrder: sortOrder,
-            searchCriteria
-        }));
+        dispatch(resetSort());
     };
 
     useEffect(() => {
+        const handleSort = (field: string) => {
+            const newSortOrder = field === sortBy && sortOrder === 'asc' ? 'desc' : 'asc';
+            dispatch(setSortBy({ field, sortOrder: newSortOrder }));
+        };
         const searchCriteria = {
             name: debouncedSearchName,
             surname: debouncedSearchSurname,
@@ -489,10 +494,10 @@ const Orders = () => {
                             )}
                         </div>
                     ))}
-                    <div className="search-field">
+                    <div className="search-field date-field">
                         <input type="date"  value={searchStartDate} onChange={(e) => setSearchStartDate(e.target.value)} />
                     </div>
-                    <div className="search-field">
+                    <div className="search-field date-field">
                         <input type="date"  value={searchEndDate} onChange={(e) => setSearchEndDate(e.target.value)} />
                     </div>
                 </div>

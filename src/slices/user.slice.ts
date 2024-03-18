@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { UserTypes } from '../types/user.types';
-import {UsersState} from "../types/users.slice.types";
+import { UserTypes, UsersState } from '../types';
+import config from "../configs/configs";
 
 
 const initialState: UsersState = {
@@ -26,7 +26,7 @@ export const fetchManagers = createAsyncThunk(
                 sortOrder,
             }).toString();
 
-            const response = await fetch(`http://localhost:8080/api/users/managers?${queryParams}`, {
+            const response = await fetch(`${config.baseUrl}/api/users/managers?${queryParams}`, {
                 credentials: 'include',
             });
 
@@ -54,7 +54,7 @@ export const addManager = createAsyncThunk(
                 created_at: currentDate
             };
 
-            const response = await fetch('http://localhost:8080/api/auth/register', {
+            const response = await fetch(`${config.baseUrl}/api/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ export const setCurrentUser = createAsyncThunk(
     'users/setCurrentUser',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/users/${userId}`);
+            const response = await fetch(`${config.baseUrl}/api/users/${userId}`);
             if (!response.ok) {
                 throw new Error('Could not fetch user data');
             }
@@ -96,7 +96,7 @@ export const generateActivationLinkForManager = createAsyncThunk(
     'users/generateActivationLinkForManager',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/auth/generate-activation-link/${userId}`, {
+            const response = await fetch(`${config.baseUrl}/api/auth/generate-activation-link/${userId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -117,11 +117,12 @@ export const resetPassword = createAsyncThunk(
     'users/resetPassword',
     async ({ token, password }: { token: string; password: string }, { rejectWithValue }) => {
         try {
-            const response = await fetch('http://localhost:8080/api/auth/set-password', {
+            const response = await fetch(`${config.baseUrl}/api/auth/set-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+
                 body: JSON.stringify({ token, password }),
             });
 
@@ -141,11 +142,12 @@ export const banManager = createAsyncThunk(
     'users/banManager',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/users/managers/ban/${userId}`, {
+            const response = await fetch(`${config.baseUrl}/api/users/managers/ban/${userId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
             });
             if (!response.ok) {
                 throw new Error('Failed to ban manager');
@@ -161,11 +163,12 @@ export const unbanManager = createAsyncThunk(
     'users/unbanManager',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/users/managers/unban/${userId}`, {
+            const response = await fetch(`${config.baseUrl}/api/users/managers/unban/${userId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
             });
             if (!response.ok) {
                 throw new Error('Failed to unban manager');
@@ -181,11 +184,12 @@ export const deleteManager = createAsyncThunk(
     'users/deleteManager',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/users/managers/${userId}`, {
+            const response = await fetch(`${config.baseUrl}/api/users/managers/${userId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
             });
             if (!response.ok) {
                 throw new Error('Failed to delete manager');
