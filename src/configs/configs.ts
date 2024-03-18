@@ -7,7 +7,7 @@ const config: Record<string, Config> = {
         baseUrl: 'http://localhost:8080',
     },
     production: {
-        baseUrl: 'https://crm-project-backend-node.onrender.com',
+        baseUrl: 'https://crm-project-backend.onrender.com',
     },
 };
 
