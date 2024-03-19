@@ -8,6 +8,7 @@ const config: Record<string, Config> = {
     },
     production: {
         baseUrl: 'https://crm-project-backend.onrender.com',
+
     },
 };
 

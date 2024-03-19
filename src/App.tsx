@@ -4,11 +4,11 @@ import { Provider } from 'react-redux';
 import { store } from './store/store';
 import { refreshAccessToken } from './slices';
 import { useDispatch } from './hooks';
-import { ProtectedRoute, Header, Login, Orders, AdminPanel, SetPassword } from './components';
+import { ProtectedRoute, Header,  Orders, AdminPanel } from './components';
+import { SetPassword, Login, NotAuthorised, MobileWarning } from './pages';
 import './App.css';
 import './styles/global.css';
-import NotAuthorised from "./Pages/NotAuthorised/NotAuthorised";
-import MobileWarning from "./Pages/MobileWarning/MobileWarning";
+
 
 interface LayoutProps {
     children: React.ReactNode;

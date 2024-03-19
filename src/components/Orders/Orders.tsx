@@ -398,10 +398,7 @@ const Orders = () => {
     };
 
     useEffect(() => {
-        const handleSort = (field: string) => {
-            const newSortOrder = field === sortBy && sortOrder === 'asc' ? 'desc' : 'asc';
-            dispatch(setSortBy({ field, sortOrder: newSortOrder }));
-        };
+
         const searchCriteria = {
             name: debouncedSearchName,
             surname: debouncedSearchSurname,
