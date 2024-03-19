@@ -1,6 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { UserTypes, UsersState } from '../types';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {UsersState} from '../types';
 import config from "../configs/configs";
+import {RootState} from "../store/store";
 
 
 const initialState: UsersState = {
@@ -14,6 +15,7 @@ const initialState: UsersState = {
     isLoading: false,
     error: null,
 };
+
 
 export const fetchManagers = createAsyncThunk(
     'users/fetchManagers',
@@ -85,12 +87,13 @@ export const setCurrentUser = createAsyncThunk(
             if (!response.ok) {
                 throw new Error('Could not fetch user data');
             }
-            return await response.json() as UserTypes;
+            return await response.json();
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
     }
 );
+
 
 export const generateActivationLinkForManager = createAsyncThunk(
     'users/generateActivationLinkForManager',
@@ -226,8 +229,10 @@ const usersSlice = createSlice({
                 state.error = action.payload as string;
             })
             .addCase(setCurrentUser.fulfilled, (state, action) => {
+                console.log('Current user data:', action.payload);
                 state.currentUser = action.payload;
             })
+
             .addCase(setCurrentUser.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
@@ -273,5 +278,6 @@ const usersSlice = createSlice({
 });
 
 export const { setPage } = usersSlice.actions;
+export const selectCurrentUser = (state: RootState) => state.users.currentUser;
 
 export default usersSlice.reducer;

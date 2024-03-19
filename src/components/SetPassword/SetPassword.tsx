@@ -15,7 +15,8 @@ const SetPassword: React.FC = () => {
 
     const handleSetPassword = async (data: IFormInput) => {
         const { password, confirmPassword } = data;
-
+        console.log(password);
+        console.log('Request Body:', JSON.stringify({ activationToken: token, newPassword: password }));
         if (password !== confirmPassword) {
             console.error('Passwords do not match');
             return;
@@ -27,6 +28,7 @@ const SetPassword: React.FC = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     activationToken: token,
                     newPassword: password,

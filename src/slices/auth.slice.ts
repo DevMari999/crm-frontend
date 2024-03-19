@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store/store';
+import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
+import {RootState} from '../store/store';
 import config from "../configs/configs";
 
 interface User {
@@ -22,7 +22,7 @@ const initialState: AuthState = {
 
 export const refreshAccessToken = createAsyncThunk(
     'auth/refreshAccessToken',
-    async (_, { getState, dispatch, rejectWithValue }) => {
+    async (_, {getState, dispatch, rejectWithValue}) => {
         try {
             const response = await fetch(`${config.baseUrl}/api/auth/refresh`, {
                 method: 'POST',
@@ -33,7 +33,7 @@ export const refreshAccessToken = createAsyncThunk(
                 throw new Error('Failed to refresh access token');
             }
 
-            const { accessToken } = await response.json();
+            const {accessToken} = await response.json();
             dispatch(fetchUserDetails());
             return accessToken;
         } catch (error) {
@@ -44,10 +44,13 @@ export const refreshAccessToken = createAsyncThunk(
 
 export const fetchUserDetails = createAsyncThunk(
     'auth/fetchUserDetails',
-    async (_, { rejectWithValue }) => {
+    async (_, {rejectWithValue}) => {
         try {
             const response = await fetch(`${config.baseUrl}/api/auth/user-details`, {
-                credentials: 'include',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }, credentials: 'include',
             });
             if (!response.ok) {
                 throw new Error('Failed to fetch user details');

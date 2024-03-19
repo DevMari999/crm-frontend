@@ -17,10 +17,20 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 15px;
-    background-color: rgba(29, 40, 59, 0.4);
-
+    background-color: rgba(29, 40, 59, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    color: white;
 }
 
+.welcome-message {
+    padding-left: 15px;
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
 .panel-logo{
     height: 30px;
     margin: 13px;

@@ -37,12 +37,12 @@ const StatusStatistics: React.FC = () => {
     useEffect(() => {
         if (statusStatistics.length > 0) {
             const labelColorMap: Record<string, string> = {
-                'in work': '#709ab5',
-                'pending': '#102b3c',
-                'completed': '#395e3f',
-                'cancelled': 'rgba(64,185,172,0.8)',
-                'dubbing': '#cbcbcb',
-                'new': '#6d1516',
+                'in work': '#a34e17',
+                'pending': '#0e2432',
+                'completed': '#38553a',
+                'cancelled': 'rgba(125,217,203,0.8)',
+                'dubbing': '#e0bc58',
+                'new': '#7d191a',
             };
 
             const labels: string[] = statusStatistics.map(stat => stat._id || 'Unknown');

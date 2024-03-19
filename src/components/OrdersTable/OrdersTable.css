@@ -87,13 +87,12 @@ tr:not(.additional-row, thead tr):hover {
 
 .course-type, .status {
     font-size: 10px;
-    width: 72px;
-    height: 16px;
+    width: 73px;
+    height: 17px;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 2px 0;
-    border-radius: 7px;
+    border-radius: 8px;
     color: white;
     font-weight: bolder;
     text-transform: uppercase;
@@ -101,13 +100,12 @@ tr:not(.additional-row, thead tr):hover {
 }
 
 .premium {
-    /*background: linear-gradient(135deg, rgba(71, 49, 133, 0.97) 0%, rgba(155, 36, 188, 0.97) 100%);*/
     background: linear-gradient(135deg, rgba(41, 47, 70, 0.97) 0%, rgba(105, 138, 213, 0.97) 100%);
     box-shadow: 0 1px 2px grey;
 }
 
 .vip {
-    background: linear-gradient(135deg, rgba(227, 139, 45, 0.97) 0%, rgba(237, 237, 66, 0.97) 100%);
+    background: linear-gradient(135deg, rgba(245, 158, 37, 0.97) 0%, rgba(241, 235, 83, 0.97) 100%);
     box-shadow: 0 1px 2px grey;
 }
 
@@ -117,12 +115,12 @@ tr:not(.additional-row, thead tr):hover {
 }
 
 .minimal {
-    background: linear-gradient(135deg, rgba(116, 21, 46, 0.97) 0%, rgba(210, 108, 178, 0.97) 100%);
+    background: linear-gradient(135deg, rgba(128, 33, 59, 0.97) 0%, rgba(216, 123, 187, 0.97) 100%);
     box-shadow: 0 1px 2px grey;
 }
 
 .incubator {
-    background: linear-gradient(135deg, rgba(230, 113, 234, 0.97) 0%, rgba(157, 123, 199, 0.97) 100%);
+    background: linear-gradient(135deg, rgba(220, 134, 223, 0.97) 0%, rgba(154, 105, 212, 0.97) 100%);
     box-shadow: 0 1px 2px grey;
 }
 

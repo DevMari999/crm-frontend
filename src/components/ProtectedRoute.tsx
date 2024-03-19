@@ -26,7 +26,7 @@ interface ProtectedRouteProps {
 
     if (allowedRoles && !allowedRoles.includes(userRole)) {
         console.log("Redirecting to not-found, role not allowed.");
-        return <Navigate to="/not-found" replace />;
+        return <Navigate to="/not-authorised" replace />;
     }
 
     return <>{children}</>;

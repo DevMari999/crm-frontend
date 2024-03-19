@@ -16,7 +16,8 @@ import {
 import {useSelector} from "react-redux";
 import {RootState} from "../../store/store";
 import {restoreScrollPosition} from "../../utils/scrollPositionUtils";
-import {EditOrder } from '../';
+import {CustomModal, EditOrder} from '../';
+
 interface OrderDetailsProps {
     order: Order;
     commentInput: string;
@@ -39,6 +40,15 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
     const currentUser = useSelector(selectUser);
     const userRole = useSelector(selectUserRole);
     const canEdit = userRole === 'admin' || order.manager === currentUserId;
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+
+    const promptDeleteComment = (commentId: string) => {
+        setSelectedCommentId(commentId);
+        setIsModalOpen(true);
+    };
+
+
     const updateComment = (orderId: string, comment: string) => {
         setCommentInput(current => ({...current, [orderId]: comment}));
     };
@@ -52,11 +62,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
         const managerName = currentUser.name;
 
         if (managerName) {
-            dispatch(addCommentToOrder({ orderId, comment, managerId: currentUserId, managerName:currentUser.name }))
+            dispatch(addCommentToOrder({orderId, comment, managerId: currentUserId, managerName: currentUser.name}))
                 .unwrap()
                 .then(() => {
                     console.log('Comment added successfully');
-                    setCommentInput(current => ({ ...current, [orderId]: '' }));
+                    setCommentInput(current => ({...current, [orderId]: ''}));
 
                     dispatch(fetchOrders({
                         page: currentPage,
@@ -74,16 +84,16 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
     };
 
 
-    const handleDeleteComment = async (commentId: string, isPersisted: boolean) => {
-        if (!isPersisted) return;
-
+    const handleDeleteComment = async () => {
+        if (!selectedCommentId) return;
         const currentScrollPosition = window.scrollY;
 
-        dispatch(deleteCommentFromOrder({orderId: order._id, commentId}))
+        dispatch(deleteCommentFromOrder({orderId: order._id, commentId: selectedCommentId}))
             .unwrap()
             .then(() => {
                 console.log("Comment deleted successfully.");
-
+                setSelectedCommentId(null);
+                setIsModalOpen(false);
                 dispatch(fetchOrders({
                     page: currentPage,
                     sortBy,
@@ -95,6 +105,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
             })
             .catch((error) => {
                 console.error("Failed to delete comment:", error);
+                setIsModalOpen(false);
             });
     };
 
@@ -109,19 +120,19 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
             </div>
             <div className="comments-input">
                 <div className="comments-section">
-                    {order.comments && order.comments.map((comment, commentIndex) => (
+                    {order.comments && order.comments.map((comment) => (
                         <div key={comment._id} className="comment global-block">
                             <p className="comment-p">
                                 {comment.comment}
                             </p>
                             <p className="date-highlight">
-                                   <p>{comment.managerName} </p>
-                                    <p>
-                                        {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                    </p>
+                                <p>{comment.managerName} </p>
+                                <p>
+                                    {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                                </p>
 
                                 {canEdit && (
                                     <img
@@ -130,7 +141,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                                         className="delete"
                                         onMouseEnter={() => setHoveredCommentId(comment._id)}
                                         onMouseLeave={() => setHoveredCommentId(null)}
-                                        onClick={() => handleDeleteComment(comment._id, true)}
+                                        onClick={() => promptDeleteComment(comment._id)}
                                     />
                                 )}
 
@@ -169,6 +180,14 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                     onClose={() => setEditingOrderId(null)}
                 />
             )}
+            {isModalOpen && (
+                <CustomModal
+                    message="Are you sure you want to delete this comment?"
+                    onConfirm={handleDeleteComment}
+                    onCancel={() => setIsModalOpen(false)}
+                />
+            )}
+
         </div>
     );
 };

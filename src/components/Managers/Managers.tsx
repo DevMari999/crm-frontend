@@ -29,7 +29,7 @@ const Managers: React.FC = () => {
     const [activationLinks, setActivationLinks] = useState<{ [key: string]: { link: string | null; visible: boolean } }>({});
     const orderStatsByManager = useSelector((state: RootState) => state.orders.orderStatsByManager);
     const navigate = useNavigate();
-
+    const [scrollPosition, setScrollPosition] = useState(0);
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const page = parseInt(urlParams.get('page') || '1', 10);
@@ -63,6 +63,7 @@ const Managers: React.FC = () => {
     };
 
     const handleConfirmAction = () => {
+
         handleCloseModal();
         const performAction = async () => {
             try {
@@ -90,8 +91,16 @@ const Managers: React.FC = () => {
         };
         performAction();
     };
+    useEffect(() => {
+        if (scrollPosition !== 0) {
+            restoreScrollPosition(scrollPosition);
+            setScrollPosition(0);
+        }
+    }, [activationLinks]);
 
     const handleActivateManager = (userId: string) => {
+        const currentScrollPosition = window.scrollY;
+        setScrollPosition(currentScrollPosition);
         dispatch(generateActivationLinkForManager(userId))
             .unwrap()
             .then((response) => {
@@ -114,6 +123,7 @@ const Managers: React.FC = () => {
             });
 
     };
+
 
     const copyToClipboard = (userId: string) => {
         const link = activationLinks[userId]?.link;
