@@ -1,6 +1,7 @@
 .admin-panel-wrapper {
     padding: 50px 0;
     min-width: 1437px;
+    background: rgba(245, 247, 249, 0.6);
 }
 
 .manager-modal {
@@ -37,7 +38,7 @@
     flex-direction: row;
    margin: 10px 30px 30px 30px;
     box-shadow: 1px 2px 3px rgba(206, 206, 206, 0.8);
-    padding: 40px 0;
+    padding: 50px 10px;
     border: solid 0.02em #eeeeee;
 }
 

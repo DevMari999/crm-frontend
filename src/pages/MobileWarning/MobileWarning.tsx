@@ -1,11 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const MobileWarningPage = () => {
+interface MobileWarningPageProps {
+    onDismiss?: () => void;
+}
+
+const MobileWarningPage: React.FC<MobileWarningPageProps> = ({ onDismiss }) => {
     const navigate = useNavigate();
 
     const handleContinue = () => {
-        navigate('/login');
+        if (onDismiss) {
+            onDismiss();
+        } else {
+            navigate('/login');
+        }
     };
 
     return (

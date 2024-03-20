@@ -16,8 +16,10 @@
 }
 
 .global-block {
-    background: rgba(245, 247, 249, 0.6);
+    background: white;
     border-radius: 10px;
+    box-shadow: 2px 2px 4px rgba(206, 206, 206);
+    border: solid 0.02em #e7e7e7;
 }
 
 .global-modal {

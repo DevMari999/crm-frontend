@@ -21,7 +21,7 @@ const initialState: OrdersState = {
 
 export const fetchOrderStatsByManager = createAsyncThunk(
     'groups/fetchGroupStatistics',
-    async (_, { rejectWithValue }) => {
+    async (_, {rejectWithValue}) => {
         try {
             const response = await fetch(`${config.baseUrl}/api/orders/order-stats-by-manager`);
             if (!response.ok) {
@@ -59,7 +59,12 @@ export const fetchOrders = createAsyncThunk(
 
 export const addCommentToOrder = createAsyncThunk(
     'orders/addCommentToOrder',
-    async ({ orderId, comment, managerId, managerName }: { orderId: string; comment: string; managerId: string; managerName: string }, { rejectWithValue }) => {
+    async ({orderId, comment, managerId, managerName}: {
+        orderId: string;
+        comment: string;
+        managerId: string;
+        managerName: string
+    }, {rejectWithValue}) => {
         try {
             const response = await fetch(`${config.baseUrl}/api/orders/${orderId}/comments`, {
                 method: 'POST',
@@ -67,7 +72,7 @@ export const addCommentToOrder = createAsyncThunk(
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify({ comment, managerId, managerName }),
+                body: JSON.stringify({comment, managerId, managerName}),
             });
 
             if (!response.ok) {
@@ -83,11 +88,9 @@ export const addCommentToOrder = createAsyncThunk(
 );
 
 
-
-
 export const deleteCommentFromOrder = createAsyncThunk(
     'orders/deleteCommentFromOrder',
-    async ({ orderId, commentId }: { orderId: string; commentId: string }, { rejectWithValue }) => {
+    async ({orderId, commentId}: { orderId: string; commentId: string }, {rejectWithValue}) => {
         try {
             const response = await fetch(`${config.baseUrl}/api/orders/${orderId}/comments/${commentId}`, {
                 method: 'DELETE',
@@ -127,6 +130,21 @@ export const fetchUniqueGroupNames = createAsyncThunk(
             throw new Error('Network response was not ok');
         }
         return await response.json();
+    }
+);
+
+export const fetchCommentsForOrder = createAsyncThunk(
+    'orders/fetchCommentsForOrder',
+    async (orderId: string, {rejectWithValue}) => {
+        try {
+            const response = await fetch(`${config.baseUrl}/api/orders/${orderId}/comments`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch comments.');
+            }
+            return await response.json();
+        } catch (error: any) {
+            return rejectWithValue(error.toString());
+        }
     }
 );
 
@@ -215,9 +233,25 @@ const ordersSlice = createSlice({
                 }
             })
 
-            .addCase(deleteCommentFromOrder.fulfilled, (state, action) => {
-
+            .addCase(fetchCommentsForOrder.pending, (state) => {
+                state.isLoading = true;
             })
+            .addCase(fetchCommentsForOrder.fulfilled, (state, action) => {
+                state.isLoading = false;
+                const index = state.data.findIndex(order => order._id === action.meta.arg);
+                if (index !== -1) {
+                    state.data[index].comments = action.payload;
+                }
+            })
+            .addCase(fetchCommentsForOrder.rejected, (state, action) => {
+                state.isLoading = false;
+            })
+            .addCase(deleteCommentFromOrder.fulfilled, (state, action) => {
+                const index = state.data.findIndex(order => order.comments.some(comment => comment._id === action.payload));
+                if (index !== -1) {
+                    state.data[index].comments = state.data[index].comments.filter(comment => comment._id !== action.payload);
+                }
+            });
 
     },
 

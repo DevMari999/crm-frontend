@@ -4,7 +4,7 @@ interface Config {
 
 const config: Record<string, Config> = {
     development: {
-        baseUrl: 'http://localhost:8080',
+        baseUrl: 'https://crm-project-backend.onrender.com',
     },
     production: {
         baseUrl: 'https://crm-project-backend.onrender.com',
