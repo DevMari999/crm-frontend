@@ -20,7 +20,7 @@ First, you need to clone the repository to your local machine. Open a terminal (
 Terminal in macOS and Linux) and run the following command:
 
 ```bash
-git clone https://your-repository-url.com
+git clone https://github.com/DevMari999/crm-frontend
 ```
 
 ### 2. Navigate to the Project Directory
