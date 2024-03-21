@@ -1,17 +1,5 @@
 import {Order} from "./order.types";
-
-export interface MonthlyOrderStats {
-    _id: {
-        year: number;
-        month: number;
-    };
-    count: number;
-    orders: Order[];
-}
-
-export interface CourseTypeStatistics {
-    [courseType: string]: number;
-}
+import {Comment} from "./order.types";
 
 interface OrderStatus {
     status: string;
@@ -38,4 +26,6 @@ export interface OrdersState {
     groupsLoading: boolean;
     groupsError: string | null;
     orderStatsByManager: ManagerOrderStats[];
+    comments: Comment[];
+    commentsLoading: boolean;
 }

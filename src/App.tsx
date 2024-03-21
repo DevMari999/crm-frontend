@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route} from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
-import { refreshAccessToken } from './slices';
+import { refreshAccessToken } from './store/thunk';
 import { useDispatch } from './hooks';
 import { ProtectedRoute, Header, Orders, AdminPanel, Loader } from './components';
 import { SetPassword, Login, NotAuthorised, MobileWarning } from './pages';

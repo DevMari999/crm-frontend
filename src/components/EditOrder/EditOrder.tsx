@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
-import {fetchOrders, fetchUniqueGroupNames} from "../../slices";
+import {fetchOrders, fetchUniqueGroupNames} from "../../store/thunk";
 import {RootState} from "../../store/store";
 import {useForm} from "react-hook-form";
 import {Order} from "../../types";

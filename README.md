@@ -1,70 +1,85 @@
-# Getting Started with Create React App
+# CRM Project Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+This CRM Project Frontend is a React-based application designed for managing customer relationships. It provides tools
+for tracking customer interactions, managing customer data, and analyzing business metrics.
 
-In the project directory, you can run:
+## Prerequisites
 
-### `npm start`
+Before you begin, ensure you have the following installed on your system:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Node.js**: A JavaScript runtime built on Chrome's V8 JavaScript engine. Download and install it
+  from [Node.js official website](https://nodejs.org/).
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Setup and Installation
 
-### `npm test`
+### 1. Clone the Repository
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+First, you need to clone the repository to your local machine. Open a terminal (Command Prompt or PowerShell in Windows,
+Terminal in macOS and Linux) and run the following command:
 
-### `npm run build`
+```bash
+git clone https://your-repository-url.com
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 2. Navigate to the Project Directory
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+After cloning, move into the project directory with:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+cd crm_project_frontend
+```
 
-### `npm run eject`
+### 3. Install Dependencies
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Inside the project directory, run the following command to install the necessary dependencies:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm install
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+This command will read the `package.json` file and install all the required Node.js packages listed under `dependencies`
+and `devDependencies`.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Running the Application
 
-## Learn More
+### Starting the Development Server
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+To start the application in development mode, run:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+npm start
+```
 
-### Code Splitting
+This command will start the React development server and open the application in your default web browser. If it doesn't
+open automatically, you can manually navigate to [http://localhost:3000](http://localhost:3000) in your browser.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Building for Production
 
-### Analyzing the Bundle Size
+To create a production build of the application, use:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```bash
+npm run build
+```
 
-### Making a Progressive Web App
+This will compile the React application into static files placed in the `build` directory, optimized for performance.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Testing the Application
 
-### Advanced Configuration
+To run the automated tests, execute:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+npm test
+```
 
-### Deployment
+This will start the test runner and execute the tests defined in the project, displaying the results in the terminal.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Common Issues
 
-### `npm run build` fails to minify
+- **Node.js Not Installed**: Make sure Node.js is installed and properly configured in your system’s PATH.
+- **Dependencies Not Installed**: Ensure all dependencies are installed correctly. If you encounter errors during
+  installation, try running `npm install` again or use `npm ci` for a clean install.
+- **Port 3000 Already in Use**: The application defaults to port 3000. If you have another service running on that port,
+  you will need to close it or configure the application to use a different port.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

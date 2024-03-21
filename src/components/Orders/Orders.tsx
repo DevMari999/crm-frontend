@@ -304,22 +304,25 @@
 // export default Orders;
 
 import React, {useEffect, useState} from 'react';
-import {OrdersTable } from '../';
+import {OrdersTable} from '../';
 import "./Orders.css";
 import {
-    fetchAllOrdersForExcel,
-    fetchOrders,
     setRowExpanded,
     setSearchCriteria,
     selectUserId,
     resetSort, setSortBy
-} from "../../slices";
-import { useSelector} from 'react-redux';
+} from "../../store/slices";
+import {
+    fetchAllOrdersForExcel,
+    fetchOrders
+} from '../../store/thunk';
+import {useSelector} from 'react-redux';
 import {useDebounce, useDispatch} from '../../hooks';
 import * as XLSX from 'xlsx';
 import reset from "../../assets/1.png";
 import exel from "../../assets/2.png";
 import {RootState} from "../../store/store";
+
 const Orders = () => {
     const [searchName, setSearchName] = useState('');
     const [searchSurname, setSearchSurname] = useState('');
@@ -412,7 +415,7 @@ const Orders = () => {
             group: debouncedSearchGroup,
             start_date: debouncedSearchStartDate,
             end_date: debouncedSearchEndDate,
-            ...(showMyOrders ? { manager: currentUserId } : {}),
+            ...(showMyOrders ? {manager: currentUserId} : {}),
         };
         dispatch(setSearchCriteria(searchCriteria));
         dispatch(fetchOrders({
@@ -462,54 +465,59 @@ const Orders = () => {
             <div className="search-fields-wrapper">
                 <div className="search-fields">
                     {[
-                        { label: "Name", value: searchName, onChange: setSearchName },
-                        { label: "Surname", value: searchSurname, onChange: setSearchSurname },
-                        { label: "Email", value: searchEmail, onChange: setSearchEmail },
-                        { label: "Phone", value: searchPhone, onChange: setSearchPhone },
-                        { label: "Age", value: searchAge, onChange: setSearchAge }
+                        {label: "Name", value: searchName, onChange: setSearchName},
+                        {label: "Surname", value: searchSurname, onChange: setSearchSurname},
+                        {label: "Email", value: searchEmail, onChange: setSearchEmail},
+                        {label: "Phone", value: searchPhone, onChange: setSearchPhone},
+                        {label: "Age", value: searchAge, onChange: setSearchAge}
                     ].map((field, index) => (
                         <div className="search-field" key={index}>
-                            <input type="text" placeholder={field.label} value={field.value} onChange={(e) => field.onChange(e.target.value)} />
+                            <input type="text" placeholder={field.label} value={field.value}
+                                   onChange={(e) => field.onChange(e.target.value)}/>
                         </div>
                     ))}
                     {[
-                        { label: "Course", state: searchCourse, setState: setSearchCourse, options: ["", "QACX", "PCX", "JSCX", "JCX", "FS", "FE"] },
-                        { label: "Format", state: searchFormat, setState: setSearchFormat, options: ["", "static", "online"] },
-                        { label: "Type", state: searchType, setState: setSearchType, options: ["", "pro", "minimal", "vip", "incubator"] },
-                        { label: "Status", state: searchStatus, setState: setSearchStatus, options: ["", "cancelled", "completed", "dubbing", "in work", "pending", "new"] },
-                        { label: "Group", value: searchGroup, onChange: setSearchGroup }
+                        {label: "Course", state: searchCourse, setState: setSearchCourse, options: ["", "QACX", "PCX", "JSCX", "JCX", "FS", "FE"]},
+                        {label: "Format", state: searchFormat, setState: setSearchFormat, options: ["", "static", "online"]},
+                        {label: "Type", state: searchType, setState: setSearchType, options: ["", "pro", "minimal", "vip", "incubator"]},
+                        {label: "Status", state: searchStatus, setState: setSearchStatus, options: ["", "cancelled", "completed", "dubbing", "in work", "pending", "new"]},
+                        {label: "Group", value: searchGroup, onChange: setSearchGroup}
                     ].map((field, index) => (
                         <div className="search-field" key={index}>
                             {field.options ? (
-                                <select className="custom-select" value={field.state} onChange={(e) => field.setState(e.target.value)}>
+                                <select className="custom-select" value={field.state}
+                                        onChange={(e) => field.setState(e.target.value)}>
                                     {field.options.map((option, index) => (
                                         <option key={index} value={option}>{option || field.label}</option>
                                     ))}
                                 </select>
                             ) : (
-                                <input type="text" placeholder={field.label} value={field.value} onChange={(e) => field.onChange(e.target.value)} />
+                                <input type="text" placeholder={field.label} value={field.value}
+                                       onChange={(e) => field.onChange(e.target.value)}/>
                             )}
                         </div>
                     ))}
                     <div className="search-field date-field">
-                        <input type="date"  value={searchStartDate} onChange={(e) => setSearchStartDate(e.target.value)} />
+                        <input type="date" value={searchStartDate}
+                               onChange={(e) => setSearchStartDate(e.target.value)}/>
                     </div>
                     <div className="search-field date-field">
-                        <input type="date"  value={searchEndDate} onChange={(e) => setSearchEndDate(e.target.value)} />
+                        <input type="date" value={searchEndDate} onChange={(e) => setSearchEndDate(e.target.value)}/>
                     </div>
                 </div>
                 <div className="extra-filter">
-                    <input type="checkbox" id="my-orders" checked={showMyOrders} onChange={handleMyOrdersChange} />
+                    <input type="checkbox" id="my-orders" checked={showMyOrders} onChange={handleMyOrdersChange}/>
                     <label htmlFor="my-orders">My</label>
                     <div className="reset" onClick={handleRotate}>
-                        <img src={reset} alt="reset" className={isRotated ? "rotateBack" : "rotate"} onAnimationEnd={() => setIsRotated(false)} />
+                        <img src={reset} alt="reset" className={isRotated ? "rotateBack" : "rotate"}
+                             onAnimationEnd={() => setIsRotated(false)}/>
                     </div>
                     <div className="exel" onClick={downloadExcel}>
-                        <img src={exel} alt="exel" className={animateDownload ? 'jump' : ''} />
+                        <img src={exel} alt="exel" className={animateDownload ? 'jump' : ''}/>
                     </div>
                 </div>
             </div>
-            <OrdersTable />
+            <OrdersTable/>
         </div>
     );
 

@@ -5,9 +5,10 @@ import home from "../../assets/home.png";
 import logOut from "../../assets/logOut.png";
 import admin from "../../assets/admin.png";
 import { useSelector } from 'react-redux';
-import { fetchUserDetails, selectUserRole, selectUser } from '../../slices';
+import { selectUserRole, selectUser } from '../../store/slices';
 import { useDispatch } from "../../hooks";
 import config from "../../configs/configs";
+import {fetchUserDetails} from "../../store/thunk";
 
 const Header = () => {
     const navigate = useNavigate();

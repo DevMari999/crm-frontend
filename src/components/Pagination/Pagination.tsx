@@ -21,7 +21,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, update
     if (currentPage > 1) {
         pages.push(
             <button key="prev" className="arrow" onClick={() => updatePageInUrl(currentPage - 1)}>
-                {"<"}
+                {"previous"}
             </button>
         );
     }
@@ -63,7 +63,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, update
     if (currentPage < totalPages) {
         pages.push(
             <button key="next"  className="arrow" onClick={() => updatePageInUrl(currentPage + 1)}>
-                {">"}
+                {"next"}
             </button>
         );
     }

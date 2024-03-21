@@ -37,12 +37,12 @@ const StatusStatistics: React.FC = () => {
     useEffect(() => {
         if (statusStatistics.length > 0) {
             const labelColorMap: Record<string, string> = {
-                'in work': '#a34e17',
-                'pending': '#0e2432',
-                'completed': '#38553a',
-                'cancelled': 'rgba(125,217,203,0.8)',
-                'dubbing': '#e0bc58',
-                'new': '#7d191a',
+                'in work': '#4e6f4c',
+                'pending': '#a0bbd9',
+                'completed': '#11392b',
+                'cancelled': 'rgb(127,28,28)',
+                'dubbing': '#afb5bc',
+                'new': '#111c2d',
             };
 
             const labels: string[] = statusStatistics.map(stat => stat._id || 'Unknown');
@@ -55,6 +55,8 @@ const StatusStatistics: React.FC = () => {
                     data,
                     backgroundColor: backgroundColors,
                     hoverBackgroundColor: backgroundColors,
+                    borderWidth: 1,
+
                 }],
             });
         }

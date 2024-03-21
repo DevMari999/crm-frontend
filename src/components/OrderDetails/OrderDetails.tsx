@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {CommentInput, Order} from "../../types";
 import './OrderDetails.css';
 import edit from "../../assets/edit.png";
@@ -6,17 +6,18 @@ import dlt from "../../assets/delete2.png";
 import dltHover from "../../assets/delete-hover.png";
 import {useDispatch} from "../../hooks";
 import {
-    addCommentToOrder,
-    deleteCommentFromOrder,
-    fetchOrders,
+    selectComments,
     selectUser,
     selectUserId,
     selectUserRole
-} from "../../slices";
+} from "../../store/slices";
+import {
+    addCommentToOrder,
+    deleteCommentFromOrder, fetchCommentsForOrder
+} from '../../store/thunk';
 import {useSelector} from "react-redux";
-import {RootState} from "../../store/store";
-import {restoreScrollPosition} from "../../utils/scrollPositionUtils";
 import {CustomModal, EditOrder} from '../';
+import {Comment} from "../../types";
 
 interface OrderDetailsProps {
     order: Order;
@@ -31,10 +32,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
     const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
     const dispatch = useDispatch();
     const [commentInput, setCommentInput] = useState<CommentInput>({});
-    const currentPage = useSelector((state: RootState) => state.orders.currentPage);
-    const sortBy = useSelector((state: RootState) => state.orders.sortBy);
-    const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
-    const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
     const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
     const currentUserId = useSelector(selectUserId);
     const currentUser = useSelector(selectUser);
@@ -42,12 +39,15 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
     const canEdit = userRole === 'admin' || order.manager === currentUserId;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+    const [comments, setComments] = useState<Comment[]>(() => order.comments || []);
+    useEffect(() => {
+        setComments(order.comments || []);
+    }, [order.comments]);
 
     const promptDeleteComment = (commentId: string) => {
         setSelectedCommentId(commentId);
         setIsModalOpen(true);
     };
-
 
     const updateComment = (orderId: string, comment: string) => {
         setCommentInput(current => ({...current, [orderId]: comment}));
@@ -57,8 +57,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
 
         if (!comment || !currentUser || !currentUser.name || !currentUserId) return;
 
-        const currentScrollPosition = window.scrollY;
-
         const managerName = currentUser.name;
 
         if (managerName) {
@@ -67,15 +65,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                 .then(() => {
                     console.log('Comment added successfully');
                     setCommentInput(current => ({...current, [orderId]: ''}));
-
-                    dispatch(fetchOrders({
-                        page: currentPage,
-                        sortBy,
-                        sortOrder,
-                        searchCriteria,
-                    })).then(() => {
-                        restoreScrollPosition(currentScrollPosition);
+                    dispatch(fetchCommentsForOrder(order._id)).unwrap().then((newComments) => {
+                        console.log('Fetched comments:', newComments);
+                        setComments(newComments);
                     });
+
                 })
                 .catch((error) => {
                     console.error('Error adding comment:', error);
@@ -83,10 +77,8 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
         }
     };
 
-
     const handleDeleteComment = async () => {
         if (!selectedCommentId) return;
-        const currentScrollPosition = window.scrollY;
 
         dispatch(deleteCommentFromOrder({orderId: order._id, commentId: selectedCommentId}))
             .unwrap()
@@ -94,13 +86,9 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                 console.log("Comment deleted successfully.");
                 setSelectedCommentId(null);
                 setIsModalOpen(false);
-                dispatch(fetchOrders({
-                    page: currentPage,
-                    sortBy,
-                    sortOrder,
-                    searchCriteria,
-                })).then(() => {
-                    restoreScrollPosition(currentScrollPosition);
+                dispatch(fetchCommentsForOrder(order._id)).unwrap().then((newComments) => {
+                    console.log('Fetched comments:', newComments);
+                    setComments(newComments);
                 });
             })
             .catch((error) => {
@@ -120,19 +108,19 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
             </div>
             <div className="comments-input">
                 <div className="comments-section">
-                    {order.comments && order.comments.map((comment) => (
-                        <div key={comment._id} className="comment global-block">
+                    {comments && comments.map((comment) => (
+                        <div key={Math.random()} className="comment global-block">
                             <p className="comment-p">
                                 {comment.comment}
                             </p>
                             <p className="date-highlight">
-                                <p>{comment.managerName} </p>
-                                <p>
+                                <span>{comment.managerName}</span>
+                                <span>
                                     {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit'
                                 })}
-                                </p>
+                                </span>
 
                                 {canEdit && (
                                     <img
@@ -193,5 +181,3 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
 };
 
 export default OrderDetails;
-
-

@@ -3,7 +3,7 @@ export interface Comment {
     managerId: string;
     comment: string;
     createdAt: Date;
-    managerName: string;
+    managerName?: string;
 }
 
 export interface Order {
@@ -25,7 +25,6 @@ export interface Order {
     group: string | null;
     manager: string | null;
     comments: Comment[];
-    groupsError: string | null;
 }
 
 export interface PaginationResult {
@@ -48,6 +47,7 @@ export interface ChartDataState {
         data: number[];
         backgroundColor: string[];
         hoverBackgroundColor: string[];
+        borderWidth?: number;
     }>;
 }
 

@@ -3,10 +3,11 @@ import { useForm } from 'react-hook-form';
 import {  useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
 import "./Login.css";
-
-import { selectUserRole, fetchUserDetails } from '../../slices';
+import { selectUserRole} from '../../store/slices';
 import {useDispatch} from "../../hooks";
 import config from "../../configs/configs";
+import {fetchUserDetails} from "../../store/thunk";
+
 interface LoginFormInputs {
     email: string;
     password: string;

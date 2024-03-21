@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectUserRole, selectAuthStatus } from '../slices';
+import { selectUserRole, selectAuthStatus } from '../store/slices';
 
 interface ProtectedRouteProps {
     children: ReactNode;

@@ -38,9 +38,9 @@ const CoursesStatistics: React.FC = () => {
                         datasets: [{
                             label: 'Course Popularity',
                             data: courseData.map(data => data.count),
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
                             borderWidth: 1,
+                            backgroundColor: 'rgba(74,100,128,0.2)',
+                            borderColor: 'rgb(30,100,149)',
                         }]
                     },
                     options: {

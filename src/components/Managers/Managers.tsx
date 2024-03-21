@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {
+    fetchOrderStatsByManager,
     fetchManagers,
     generateActivationLinkForManager,
     banManager,
     unbanManager,
-    deleteManager,
-    fetchOrderStatsByManager
-} from '../../slices';
+    deleteManager
+} from '../../store/thunk';
 import {RootState} from '../../store/store';
 import {Pagination, CustomModal } from '../';
 import './Managers.css';

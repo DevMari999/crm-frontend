@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from '../../hooks';
-import { addManager } from '../../slices';
+import { addManager } from '../../store/thunk';
 import { Managers, StatusStatistics, DatesStatistics, CoursesStatistics } from '../';
 import './AdminPanel.css';
 

@@ -1,34 +1,37 @@
 .pagination-controls {
     margin: 50px 0 70px 0;
+    background: linear-gradient(145deg, rgba(29, 31, 42, 0.95) 0%, rgba(54, 58, 74, 0.95) 100%);
+    border-radius: 15px;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .pagination-controls button {
-    background: linear-gradient(145deg, rgba(29, 31, 42, 0.95) 0%, rgba(54, 58, 74, 0.95) 100%);
+    background: transparent;
     color: #ededed;
     border-radius: 12px;
-    margin: 0 7px;
-    padding: 2px 8px 4px 7px;
+    margin: 6px 9px;
+    padding: 2px 8px 4px 8px;
     min-width: 28px;
     height: 28px;
     cursor: pointer;
-    border: solid #101b29 1px;
+    border: none;
     font-size: 15px;
     transition: all 0.4s ease;
-    box-shadow: 0 2px 3px rgba(73, 73, 73, 0.5);
 }
 
 .pagination-controls button:hover {
-    box-shadow: 0 2px 6px rgba(50, 50, 50, 0.7);
     transform: translateY(-1px);
 }
 
 .active-button {
-    background: linear-gradient(145deg, rgba(113, 15, 15, 0.98) 0%, rgba(163, 49, 49, 0.98) 100%) !important;
+    background: linear-gradient(145deg, rgba(113, 15, 15, 0.98) 0%, rgba(184, 58, 58, 0.98) 100%) !important;
     border: solid #6a1515 1px !important;
 }
 
 .pagination-controls span {
     font-size: 15px;
 }
+
 
 

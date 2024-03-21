@@ -66,7 +66,8 @@ const DatesStatistics: React.FC = () => {
                             label: 'Orders by Month',
                             data: data,
                             fill: false,
-                            borderColor: 'rgb(24,219,216)',
+                            borderColor: 'rgb(30,100,149)',
+                            borderWidth: 2,
                             tension: 0.1
                         }]
                     },
