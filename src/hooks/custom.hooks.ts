@@ -1,22 +1,29 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {useDispatch as reduxUseDispatch} from 'react-redux';
 import type {AppDispatch} from '../store/store';
+import {SearchFields} from "../types";
 
-export function useDebounce<T>(value: T, delay: number): T {
-    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+export function useDebouncedSearchFields(searchFields: SearchFields): SearchFields {
+    const [debouncedFields, setDebouncedFields] = useState<SearchFields>(searchFields);
+    const prevFieldsRef = useRef<SearchFields>(searchFields);
 
     useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedValue(value);
-        }, delay);
+        const fieldsChanged = Object.keys(searchFields).some(key => {
+            const fieldKey = key as keyof SearchFields;
+            return searchFields[fieldKey] !== prevFieldsRef.current[fieldKey];
+        });
 
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [value, delay]);
+        if (fieldsChanged) {
+            const handler = setTimeout(() => {
+                setDebouncedFields(searchFields);
+                prevFieldsRef.current = searchFields;
+            }, 500);
 
-    return debouncedValue;
+            return () => clearTimeout(handler);
+        }
+    }, [searchFields]);
+
+    return debouncedFields;
 }
-
 
 export const useDispatch = () => reduxUseDispatch<AppDispatch>();

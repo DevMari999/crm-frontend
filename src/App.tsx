@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route} from 'react-router-dom';
+import {Routes, Route, Navigate} from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import { refreshAccessToken } from './store/thunk';
@@ -49,12 +49,12 @@ const App = () => {
     };
 
     return (
-        <Provider store={store}>
             <div className="app">
                 {showMobileWarning ? (
                     <MobileWarning onDismiss={handleDismissMobileWarning} />
                 ) : (
                     <Routes>
+                        <Route path="/" element={<Navigate to="/orders" replace />} />
                         <Route path="/activate/:token" element={<SetPassword />} />
                         <Route path="/not-authorised" element={<NotAuthorised />} />
                         <Route path="/login" element={<Login />} />
@@ -71,7 +71,6 @@ const App = () => {
                     </Routes>
                 )}
             </div>
-        </Provider>
     );
 };
 

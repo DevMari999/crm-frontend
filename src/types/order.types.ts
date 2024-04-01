@@ -58,3 +58,26 @@ export interface MonthlyStat {
     };
     count: number;
 }
+
+export type SearchFields = {
+    name: string;
+    surname: string;
+    email: string;
+    phone: string;
+    age: string;
+    course: string;
+    format: string;
+    type: string;
+    status: string;
+    group: string;
+    start_date: string;
+    end_date: string;
+};
+
+export type FieldDefinition = {
+    label: string;
+    param: SearchFieldKey;
+    options?: string[];
+};
+
+export type SearchFieldKey = keyof SearchFields;

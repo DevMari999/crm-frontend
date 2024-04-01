@@ -5,8 +5,7 @@ import {
     fetchOrderStatsByManager,
     addCommentToOrder,
     deleteCommentFromOrder,
-    fetchAllOrdersForExcel,
-    fetchUniqueGroupNames, fetchCommentsForOrder,
+    fetchCommentsForOrder,
 } from '../thunk';
 import {Comment} from "../../types";
 import {RootState} from "../store";
@@ -81,16 +80,6 @@ const ordersSlice = createSlice({
             })
             .addCase(fetchOrders.rejected, (state) => {
                 state.isLoading = false;
-            })
-            .addCase(fetchAllOrdersForExcel.pending, (state) => {
-                state.isLoading = true;
-            })
-            .addCase(fetchUniqueGroupNames.fulfilled, (state, action) => {
-                state.uniqueGroupNames = action.payload;
-            })
-            .addCase(fetchAllOrdersForExcel.rejected, (state) => {
-                state.isLoading = false;
-
             })
             .addCase(addCommentToOrder.fulfilled, (state, action) => {
 

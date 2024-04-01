@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import {useSearchParams} from 'react-router-dom';
 import { AppDispatch, RootState } from '../../store/store';
 import {  setCurrentPage, setExpandedRow, setSortBy } from '../../store/slices';
 import { fetchOrders } from '../../store/thunk';
@@ -12,12 +12,10 @@ import { OrderDetails } from '../';
 import config from "../../configs/configs";
 
 const OrdersTable = () => {
-    const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const itemsPerPage = 25;
     const orders = useSelector((state: RootState) => state.orders.data);
     const isLoading = useSelector((state: RootState) => state.orders.isLoading);
-    const currentPage = useSelector((state: RootState) => state.orders.currentPage);
     const totalPages = useSelector((state: RootState) => state.orders.totalPages);
     const sortBy = useSelector((state: RootState) => state.orders.sortBy);
     const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
@@ -26,6 +24,10 @@ const OrdersTable = () => {
     const expandedRow = useSelector((state: RootState) => state.orders.expandedRowId);
     const [managerLastNames, setManagerLastNames] = useState<Record<string, string>>({});
     const fetchedManagerIds = useRef(new Set());
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentPageFromUrl = parseInt(searchParams.get('page') || '1', 10);
+    const [currentPage, setCurrentPage] = useState(currentPageFromUrl);
+
 
     if (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {
         document.body.classList.add('safari-specific');
@@ -58,10 +60,12 @@ const OrdersTable = () => {
         });
     }, [orders]);
 
+    useEffect(() => {
+        setCurrentPage(currentPageFromUrl);
+    }, [currentPageFromUrl]);
 
-    const updatePageInUrl = (newPage: number) => {
-        navigate(`/orders?page=${newPage}`, {replace: true});
-        dispatch(setCurrentPage(newPage));
+    const handlePageChange = (newPage: number) => {
+        setSearchParams({ page: newPage.toString() });
     };
 
     const handleSort = (field: string) => {
@@ -203,8 +207,11 @@ const OrdersTable = () => {
                 ))}
                 </tbody>
             </table>
-            <Pagination currentPage={currentPage} totalPages={totalPages} updatePageInUrl={updatePageInUrl}/>
-
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                updatePageInUrl={handlePageChange}
+            />
         </div>
     );
 };
