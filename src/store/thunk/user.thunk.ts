@@ -1,5 +1,8 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import config from "../../configs/configs";
+import {createAsyncThunk} from '@reduxjs/toolkit';
+import {AxiosError} from "axios";
+import api from "../../service/service";
+import {ErrorResponse} from "../../types/error.types";
+
 
 export const fetchManagers = createAsyncThunk(
     'users/fetchManagers',
@@ -12,90 +15,57 @@ export const fetchManagers = createAsyncThunk(
                 sortOrder,
             }).toString();
 
-            const response = await fetch(`${config.baseUrl}/api/users/managers?${queryParams}`, {
-                credentials: 'include',
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            return await response.json();
-        } catch (error: any) {
-            return rejectWithValue(error.message);
+            const response = await api.get(`/api/users/managers?${queryParams}`);
+            return response.data;
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Network response was not ok');
         }
     }
 );
-
 
 export const addManager = createAsyncThunk(
     'users/addManager',
     async (managerData: { name: string; lastname: string; email: string }, { dispatch, rejectWithValue }) => {
         try {
-            const currentDate = new Date();
-
-
             const requestData = {
                 ...managerData,
-                created_at: currentDate
+                created_at: new Date()
             };
 
-            const response = await fetch(`${config.baseUrl}/api/auth/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData),
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const responseData = await response.json();
-
+            const response = await api.post(`/api/auth/register`, requestData);
             dispatch(fetchManagers({ page: 1, limit: 3 }));
-
-            return responseData;
-        } catch (error: any) {
-            return rejectWithValue(error.message);
+            return response.data;
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Network response was not ok');
         }
     }
 );
+
 
 export const setCurrentUser = createAsyncThunk(
     'users/setCurrentUser',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${config.baseUrl}/api/users/${userId}`);
-            if (!response.ok) {
-                throw new Error('Could not fetch user data');
-            }
-            return await response.json();
-        } catch (error: any) {
-            return rejectWithValue(error.message);
+            const response = await api.get(`/api/users/${userId}`);
+            return response.data;
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Could not fetch user data');
         }
     }
 );
-
 
 export const generateActivationLinkForManager = createAsyncThunk(
     'users/generateActivationLinkForManager',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${config.baseUrl}/api/auth/generate-activation-link/${userId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (!response.ok) {
-                throw new Error('Failed to generate activation link');
-            }
-            const data = await response.json();
-            return data;
-        } catch (error: any) {
-            return rejectWithValue(error.message);
+            const response = await api.post(`/api/auth/generate-activation-link/${userId}`);
+            return response.data;
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Failed to generate activation link');
         }
     }
 );
@@ -104,23 +74,14 @@ export const resetPassword = createAsyncThunk(
     'users/resetPassword',
     async ({ token, password }: { token: string; password: string }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${config.baseUrl}/api/auth/set-password`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-
-                body: JSON.stringify({ token, password }),
+            const response = await api.post(`/api/auth/set-password`, {
+                token,
+                password
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to reset password');
-            }
-
-            const data = await response.json();
-            return data;
-        } catch (error: any) {
-            return rejectWithValue(error.message);
+            return response.data;
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Failed to reset password');
         }
     }
 );
@@ -129,19 +90,11 @@ export const banManager = createAsyncThunk(
     'users/banManager',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${config.baseUrl}/api/users/managers/ban/${userId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
-            if (!response.ok) {
-                throw new Error('Failed to ban manager');
-            }
-            return await response.json();
-        } catch (error: any) {
-            return rejectWithValue(error.message);
+            const response = await api.patch(`/api/users/managers/ban/${userId}`);
+            return response.data;
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Failed to ban manager');
         }
     }
 );
@@ -150,19 +103,11 @@ export const unbanManager = createAsyncThunk(
     'users/unbanManager',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${config.baseUrl}/api/users/managers/unban/${userId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
-            if (!response.ok) {
-                throw new Error('Failed to unban manager');
-            }
-            return await response.json();
-        } catch (error: any) {
-            return rejectWithValue(error.message);
+            const response = await api.patch(`/api/users/managers/unban/${userId}`);
+            return response.data;
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Failed to unban manager');
         }
     }
 );
@@ -171,19 +116,11 @@ export const deleteManager = createAsyncThunk(
     'users/deleteManager',
     async (userId: string, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${config.baseUrl}/api/users/managers/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
-            if (!response.ok) {
-                throw new Error('Failed to delete manager');
-            }
+            const response = await api.delete(`/api/users/managers/${userId}`);
             return userId;
-        } catch (error: any) {
-            return rejectWithValue(error.message);
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Failed to delete manager');
         }
     }
 );

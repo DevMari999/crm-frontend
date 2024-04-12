@@ -2,7 +2,7 @@
     border: none !important;
     cursor: alias !important;
     box-shadow: inset 0 2px 2px -1px rgba(203, 203, 203, 0.5), inset 0 -2px 2px -1px rgba(203, 203, 203, 0.5);
-    background: rgba(245, 247, 249, 0.6);
+    background: rgba(245, 247, 249, 0.45);
 }
 
 .order-details-container {

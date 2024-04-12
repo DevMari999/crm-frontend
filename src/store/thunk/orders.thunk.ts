@@ -1,94 +1,78 @@
-import {createAsyncThunk} from '@reduxjs/toolkit';
-import {Order,  PaginationResult} from "../../types";
-import config from "../../configs/configs";
-import { Comment } from '../../types';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../service/service';  // Adjust this path to point to your api.ts file location
+import { Order, PaginationResult, Comment } from "../../types";
+import  { AxiosError } from 'axios';
+import {ErrorResponse} from "../../types/error.types";
+
+
 export const fetchOrderStatsByManager = createAsyncThunk(
     'groups/fetchGroupStatistics',
-    async (_, {rejectWithValue}) => {
+    async (_, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${config.baseUrl}/api/orders/order-stats-by-manager`);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return await response.json();
+            const response = await api.get('/api/orders/order-stats-by-manager');
+            return response.data;
         } catch (error: unknown) {
-            if (error instanceof Error) {
-                return rejectWithValue(error.message);
-            }
-            return rejectWithValue('An unknown error occurred');
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'An unknown error occurred');
         }
     }
 );
 
 export const fetchOrders = createAsyncThunk(
     'orders/fetchOrders',
-    async ({page, sortBy, sortOrder, searchCriteria}:
-               {
-                   page: number,
-                   sortBy: string,
-                   sortOrder: 'asc' | 'desc',
-                   searchCriteria: Record<string, any>
-               }): Promise<PaginationResult> => {
-        const queryParams = new URLSearchParams({page: page.toString(), sortBy, sortOrder});
-        queryParams.set('searchCriteria', JSON.stringify(searchCriteria));
-        const response = await fetch(`${config.baseUrl}/api/orders?${queryParams}`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+    async ({ page, sortBy, sortOrder, searchCriteria }: {
+        page: number;
+        sortBy: string;
+        sortOrder: 'asc' | 'desc';
+        searchCriteria: Record<string, any>
+    }): Promise<PaginationResult> => {
+        try {
+            const queryParams = new URLSearchParams({
+                page: page.toString(),
+                sortBy,
+                sortOrder,
+                searchCriteria: JSON.stringify(searchCriteria)
+            }).toString();
+
+            const response = await api.get(`/api/orders?${queryParams}`);
+            return response.data as PaginationResult;
+        } catch (error) {
+            throw new Error('Network response was not ok'); // Keeping throw as it gets caught by createAsyncThunk's rejected handler
         }
-        return await response.json() as PaginationResult;
     }
 );
 
-
 export const addCommentToOrder = createAsyncThunk(
     'orders/addCommentToOrder',
-    async ({orderId, comment, managerId, managerName}: {
+    async ({ orderId, comment, managerId, managerName }: {
         orderId: string;
         comment: string;
         managerId: string;
         managerName: string
-    }, {rejectWithValue}) => {
+    }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${config.baseUrl}/api/orders/${orderId}/comments`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({comment, managerId, managerName}),
+            const response = await api.post(`/api/orders/${orderId}/comments`, {
+                comment,
+                managerId,
+                managerName
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to add the comment.');
-            }
-
-            return await response.json();
-        } catch (error: any) {
-            return rejectWithValue(error.toString());
+            return response.data;
+        } catch (error) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Failed to add the comment.');
         }
     }
 );
 
-
 export const deleteCommentFromOrder = createAsyncThunk(
     'orders/deleteCommentFromOrder',
-    async ({orderId, commentId}: { orderId: string; commentId: string }, {rejectWithValue}) => {
+    async ({ orderId, commentId }: { orderId: string; commentId: string }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${config.baseUrl}/api/orders/${orderId}/comments/${commentId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete the comment.');
-            }
-
-            return commentId;
-        } catch (error: any) {
-            return rejectWithValue(error.toString());
+            const response = await api.delete(`/api/orders/${orderId}/comments/${commentId}`);
+            return commentId; // Success, return commentId
+        } catch (error) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Failed to delete the comment.');
         }
     }
 );
@@ -96,22 +80,24 @@ export const deleteCommentFromOrder = createAsyncThunk(
 export const fetchAllOrdersForExcel = createAsyncThunk(
     'orders/fetchAllOrdersForExcel',
     async (): Promise<Order[]> => {
-        const response = await fetch(`${config.baseUrl}/api/orders/excel`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        try {
+            const response = await api.get('/api/orders/excel');
+            return response.data as Order[];
+        } catch (error) {
+            throw new Error('Network response was not ok'); // Keeping throw as it gets caught by createAsyncThunk's rejected handler
         }
-        return await response.json() as Order[];
     }
 );
 
 export const fetchUniqueGroupNames = createAsyncThunk(
     'orders/fetchUniqueGroupNames',
     async (): Promise<string[]> => {
-        const response = await fetch(`${config.baseUrl}/api/orders/groups/unique-names`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        try {
+            const response = await api.get('/api/orders/groups/unique-names');
+            return response.data;
+        } catch (error) {
+            throw new Error('Network response was not ok'); // Keeping throw as it gets caught by createAsyncThunk's rejected handler
         }
-        return await response.json();
     }
 );
 
@@ -119,15 +105,11 @@ export const fetchCommentsForOrder = createAsyncThunk<Comment[], string>(
     'orders/fetchCommentsForOrder',
     async (orderId, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${config.baseUrl}/api/orders/${orderId}/comments`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch comments');
-            }
-            const data = await response.json();
-            return data as Comment[];
+            const response = await api.get(`/api/orders/${orderId}/comments`);
+            return response.data as Comment[];
         } catch (error) {
-            return rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
+            const axiosError = error as AxiosError<ErrorResponse>;
+            return rejectWithValue(axiosError.response?.data.message || 'Failed to fetch comments');
         }
     }
 );
-
