@@ -7,6 +7,7 @@ import {Order} from "../../types";
 import {useDispatch} from "../../hooks";
 import {restoreScrollPosition} from "../../utils/scrollPositionUtils";
 import "./EditOrder.css";
+import {useSearchParams} from 'react-router-dom';
 import config from "../../configs/configs";
 interface EditOrderProps {
     order: Order;
@@ -15,7 +16,9 @@ interface EditOrderProps {
 
 const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
     const dispatch = useDispatch();
-    const currentPage = useSelector((state: RootState) => state.orders.currentPage);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentPageFromUrl = parseInt(searchParams.get('page') || '1', 10);
+    const [currentPage, setCurrentPage] = useState(currentPageFromUrl);
     const sortBy = useSelector((state: RootState) => state.orders.sortBy);
     const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
     const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
@@ -24,6 +27,12 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
     });
     const uniqueGroupNames = useSelector((state: RootState) => state.orders.uniqueGroupNames);
     const [isAddingNewGroup, setIsAddingNewGroup] = useState(false);
+
+    useEffect(() => {
+        console.log('Updating currentPage to:', currentPageFromUrl);
+        setCurrentPage(currentPageFromUrl);
+    }, [currentPageFromUrl]);
+
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         dispatch(fetchUniqueGroupNames());
@@ -71,6 +80,7 @@ const EditOrder: React.FC<EditOrderProps> = ({order, onClose}) => {
 
             const updatedOrder = await response.json();
             console.log('Order updated successfully:', updatedOrder);
+            console.log(currentPage);
             dispatch(fetchOrders({
                 page: currentPage,
                 sortBy,

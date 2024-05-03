@@ -35,7 +35,6 @@ const App = () => {
             .unwrap()
             .then(() => setAuthInitializing(false))
             .catch((error) => {
-                console.error(error);
                 setAuthInitializing(false);
             });
     }, [dispatch]);
