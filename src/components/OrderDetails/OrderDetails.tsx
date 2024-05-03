@@ -36,7 +36,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
     const currentUserId = useSelector(selectUserId);
     const currentUser = useSelector(selectUser);
     const userRole = useSelector(selectUserRole);
-    const canEdit = userRole === 'admin' || order.manager === currentUserId;
+    const canEdit = order.manager === currentUserId || order.status === null || order.status === "";
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
     const [comments, setComments] = useState<Comment[]>(() => order.comments || []);

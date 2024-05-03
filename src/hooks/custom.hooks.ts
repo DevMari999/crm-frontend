@@ -17,7 +17,7 @@ export function useDebouncedSearchFields(searchFields: SearchFields): SearchFiel
             const handler = setTimeout(() => {
                 setDebouncedFields(searchFields);
                 prevFieldsRef.current = searchFields;
-            }, 500);
+            }, 1000);
 
             return () => clearTimeout(handler);
         }

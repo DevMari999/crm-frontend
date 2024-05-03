@@ -13,11 +13,15 @@ interface User {
 interface AuthState {
     user: User | null;
     status: 'idle' | 'loading' | 'failed';
+    accessToken: string | null;
+    refreshToken: string | null;
 }
 
 const initialState: AuthState = {
     user: null,
     status: 'idle',
+    accessToken: null,
+    refreshToken: null
 };
 
 

@@ -60,7 +60,10 @@ const OrdersTable = () => {
         });
     }, [orders]);
 
+    console.log('currentPageFromUrl:', currentPageFromUrl);
+
     useEffect(() => {
+        console.log('Updating currentPage to:', currentPageFromUrl);
         setCurrentPage(currentPageFromUrl);
     }, [currentPageFromUrl]);
 

@@ -31,6 +31,7 @@ const Orders = () => {
     const currentPage = useSelector((state: RootState) => state.orders.currentPage);
     const sortBy = useSelector((state: RootState) => state.orders.sortBy);
     const sortOrder = useSelector((state: RootState) => state.orders.sortOrder);
+    const searchCriteria = useSelector((state: RootState) => state.orders.searchCriteria);
 
     const searchFields = {
         name: searchParams.get('name') || '',
@@ -116,6 +117,21 @@ const Orders = () => {
                 setAnimateDownload(false);
             });
     };
+    const toggleShowMyOrders = (isChecked: boolean) => {
+        setShowMyOrders(isChecked);
+
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('page', '1');
+        setSearchParams(newSearchParams, { replace: true });
+
+        dispatch(setSearchCriteria({ ...searchCriteria, manager: isChecked ? currentUserId : undefined }));
+        dispatch(fetchOrders({
+            page: 1,
+            sortBy,
+            sortOrder,
+            searchCriteria: { ...searchCriteria, manager: isChecked ? currentUserId : undefined }
+        }));
+    };
 
     const fieldDefinitions: FieldDefinition[] = [
         { label: "Name", param: 'name' },
@@ -176,7 +192,7 @@ const Orders = () => {
                         type="checkbox"
                         id="my-orders"
                         checked={showMyOrders}
-                        onChange={(e) => setShowMyOrders(e.target.checked)}
+                        onChange={(e) => toggleShowMyOrders(e.target.checked)}
                     />
                     <label htmlFor="my-orders">My</label>
                     <div className="reset" onClick={handleRotate}>
